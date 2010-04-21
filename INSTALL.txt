@@ -3,7 +3,7 @@ Instructions for properly installing/building these files:
 A) Download and install the following libraries:
 
    OpenAL:
-     http://connect.creativelabs.com/openal/Downloads/OpenAL11CoreSDK.zip
+     http://openal-soft-1.12.854-bin.zip
 
    libogg:
      http://downloads.xiph.org/releases/ogg/libogg-1.2.0.zip
