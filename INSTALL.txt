@@ -2,7 +2,7 @@ Instructions for properly installing/building these files:
 
 A) Download and install the following libraries:
 
-   OpenAL:
+   OpenAL (Not needed if you have hardware AL support):
      http://openal-soft-1.12.854-bin.zip
 
    libogg:
@@ -13,7 +13,9 @@ A) Download and install the following libraries:
 
 B) Add the include directories from those libraries to your project
 
-C) Link the client DLL to the libraries that you've downloaded.
+C) Link the client DLL to the libraries that you've downloaded. You should
+   link OpenAL dynamically, in order to respect anyone with cards that
+	 support hardware acceleration.
 
 D) Build your project
 
