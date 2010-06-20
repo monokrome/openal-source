@@ -1,3 +1,4 @@
+OpenAL-Source, Version 0.2
 Embeds OpenAL into the Source Engine with a few other useful/related tools.
 
 Features:
