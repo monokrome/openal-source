@@ -13,7 +13,7 @@
 
 // @see http://developer.valvesoftware.com/wiki/Dimensions
 const float valveUnitsPerMeter = 1 / 0.01905;
-const float valveSpeedOfSound = VALVEUNITS_TO_METERS(340.29);
+const float valveSpeedOfSound = METERS_TO_VALVEUNITS(340.29);
 
 #ifndef CLIENT_DLL
 #error You don't need OpenAL on the server. Only compile it for the client.

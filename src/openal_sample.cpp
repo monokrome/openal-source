@@ -270,6 +270,7 @@ void IOpenALSample::SetPositional(bool positional=false)
 	if (m_bPositional)
 	{
 		m_bRequiresSync = true;
+		alSourcei(source, AL_SOURCE_RELATIVE, AL_FALSE);
 		alSourcef(source, AL_ROLLOFF_FACTOR, BASE_ROLLOFF_FACTOR);
 		if (alGetError() != AL_NO_ERROR)
 		{
@@ -278,6 +279,7 @@ void IOpenALSample::SetPositional(bool positional=false)
 	}
 	else
 	{
+		alSourcei(source, AL_SOURCE_RELATIVE, AL_TRUE);
 		alSourcef(source, AL_ROLLOFF_FACTOR, 0.0f);
 		if (alGetError() != AL_NO_ERROR)
 		{
