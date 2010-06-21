@@ -17,7 +17,7 @@ IOpenALSample::IOpenALSample()
 	m_fPosition[2] = 0.0f;
 	m_fVelocity[0] = 0.0f;
 	m_fVelocity[1] = 0.0f;
-	m_fVelocity[2] = 1.0f;
+	m_fVelocity[2] = 0.0f;
 }
 
 IOpenALSample::~IOpenALSample()
@@ -169,7 +169,8 @@ void IOpenALSample::Stop()
 	if (!IsPlaying())
 		return; // Whachootockinaboutwillis?
 
-	alSourceStop(source);
+	// alSourceStop(source); -- Using rewind for now. Fixes a bug with olderOpenAL Soft versions.
+	alSourceRewind(source);
 	if (alGetError() != AL_NO_ERROR)
 	{
 		Warning("OpenAL: Error stopping a sound. This is less than good news.\n");
@@ -313,7 +314,7 @@ inline void IOpenALSample::UpdatePositional(const float lastUpdate)
 
 		velocity[0] = 0.0f;
 		velocity[1] = 0.0f;
-		velocity[2] = -1.0f;
+		velocity[2] = 0.0f;
 	}
 
 	alSourcefv(source, AL_POSITION,    position);
