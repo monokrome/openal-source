@@ -20,7 +20,7 @@ Coming:
 - Entities allowing mappers to modify the state of the system
 - Relinking standard Source entities to use OpenAL instead of Miles
 
-All samples are currently transient. They will not be removed on map change
+All samples currently are not transient. They will not be removed on map change
 or if any other game-based event occurs, aside from quitting the game
 altogether. This will be changed in a later release.
 
