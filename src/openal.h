@@ -7,9 +7,13 @@
 #include "AL/alc.h"
 
 
-#define METERS_TO_VALVEUNITS(u) valveUnitsPerMeter*u // Converts meters to valve units
-#define VALVEUNITS_TO_METERS(u) 0.01905*u // Converts valve units to meters
+#define METERS_TO_VALVEUNITS(u) (valveUnitsPerMeter*(u)) // Converts meters to valve units
+#define VALVEUNITS_TO_METERS(u) (0.01905*(u)) // Converts valve units to meters
 #define BASE_ROLLOFF_FACTOR 1.0f
+
+// @see http://developer.valvesoftware.com/wiki/Dimensions
+const float valveUnitsPerMeter = 1 / 0.01905;
+const float valveSpeedOfSound = VALVEUNITS_TO_METERS(340.29);
 
 #ifndef CLIENT_DLL
 #error You don't need OpenAL on the server. Only compile it for the client.

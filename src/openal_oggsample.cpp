@@ -61,16 +61,15 @@ void COpenALOggSample::Open(const char* filename)
 
 void COpenALOggSample::Close()
 {
-	m_bFinished = true;
 	m_bReady = false;
-
+	ClearBuffers();
 	ov_clear(&oggSample);
-
-	Destroy();
 }
 
 bool COpenALOggSample::CheckStream(ALuint buffer)
 {
+	if (!IsReady()) return false;
+
 	char data[BUFFER_SIZE];
 	int result, section=0, size=0;
 
@@ -142,11 +141,12 @@ int vorbis_seek_func(void *datasource, ogg_int64_t offset, int whence)
 {
 	FileSystemSeek_t seekPoint;
 	FileHandle_t* fileDesc = (FileHandle_t*) datasource;
-	ogg_int64_t originalPos = filesystem->Tell(fileDesc);
+	ogg_int64_t newPos, originalPos = filesystem->Tell(fileDesc);
 
 	switch (whence)
 	{
 		case SEEK_CUR:
+			if (originalPos+offset == originalPos) return originalPos;
 			seekPoint = FILESYSTEM_SEEK_CURRENT;
 			break;
 
@@ -163,12 +163,12 @@ int vorbis_seek_func(void *datasource, ogg_int64_t offset, int whence)
 	}
 
 	filesystem->Seek(fileDesc, offset, seekPoint);
+	newPos = filesystem->Tell(fileDesc);
 
-		// If the position hasn't changed, we had an issue.
-	if (originalPos == filesystem->Tell(fileDesc))
-		return -1;
+		// If the position hasn't changed, we had a major issue.
+	if (originalPos == newPos) return -1;
 
-	return filesystem->Tell(fileDesc);
+	return newPos;
 }
 
 long vorbis_tell_func(void *datasource)

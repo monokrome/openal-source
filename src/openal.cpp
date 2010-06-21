@@ -3,14 +3,10 @@
 #include "c_basehlplayer.h" // For listener syncronization
 
 // This will tell OpenAL to start running the demo automatically.
-#define OPENAL_AUTOSTART_DEMO
+//#define OPENAL_AUTOSTART_DEMO
 
 COpenALUpdateThread    g_OpenALUpdateThread;
 COpenALGameSystem      g_OpenALGameSystem;
-
-// @see http://developer.valvesoftware.com/wiki/Dimensions
-const float valveUnitsPerMeter = 1 / 0.01905;
-const float valveSpeedOfSound = VALVEUNITS_TO_METERS(340.29);
 
 /**********
  * Methods for the OpenAL manager itself.
@@ -216,10 +212,10 @@ void COpenALGameSystem::UpdateSamples(const float updateTime)
 	}
 }
 
-// Gets the full path of a specified sound file relative to the /sounds folder
+// Gets the full path of a specified sound file relative to the /sound folder
 void COpenALGameSystem::GetSoundPath(const char* relativePath, char* buffer, size_t bufferSize)
 {
-  Q_snprintf(buffer, bufferSize, "%s/sounds/%s", engine->GetGameDirectory(), relativePath);
+  Q_snprintf(buffer, bufferSize, "%s/sound/%s", engine->GetGameDirectory(), relativePath);
 
   for (; *buffer; ++buffer) {
     if (*buffer == '\\') *buffer = '/';

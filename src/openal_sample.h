@@ -35,8 +35,8 @@ public:
 	void SetPosition(float x, float y, float z);
 	void SetPosition(Vector position);
 	void SetPosition(const float position[3]);
-	void SetDirection(const float orientation[3]);
-	void SetDirection(const Vector direction);
+	void SetVelocity(const float orientation[3]);
+	void SetVelocity(const Vector velocity);
 
 	void SetLooping(bool shouldLoop);
 	void ClearBuffers();
@@ -71,7 +71,7 @@ protected:
 
 	bool m_bPositional; // Are we placed in a world position?
 	float m_fPosition[3]; // Where is this sample source?
-	float m_fDirection[3]; // In which direction is our source playing?
+	float m_fVelocity[3]; // In which velocity is our source playing?
 
 	bool m_bLinkedToEntity; // Are we currently linked to an entity for position/orientation?
 	CBaseEntity* m_pLinkedEntity; // Used for linking entities to this sample's source

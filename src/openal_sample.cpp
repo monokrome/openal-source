@@ -15,9 +15,9 @@ IOpenALSample::IOpenALSample()
 	m_fPosition[0] = 0.0f;
 	m_fPosition[1] = 0.0f;
 	m_fPosition[2] = 0.0f;
-	m_fDirection[0] = 0.0f;
-	m_fDirection[1] = 0.0f;
-	m_fDirection[2] = 1.0f;
+	m_fVelocity[0] = 0.0f;
+	m_fVelocity[1] = 0.0f;
+	m_fVelocity[2] = 1.0f;
 }
 
 IOpenALSample::~IOpenALSample()
@@ -28,7 +28,6 @@ IOpenALSample::~IOpenALSample()
 void IOpenALSample::Init()
 {
 	alGenBuffers(NUM_BUFFERS, buffers);
-
 	if (alGetError() != AL_NO_ERROR)
 	{
 		Warning("OpenAL: Error generating a sample's buffers. Sample will not play.\n");
@@ -36,40 +35,36 @@ void IOpenALSample::Init()
 	}
 
 	alGenSources(1, &source);
-
 	if (alGetError() != AL_NO_ERROR)
 	{
 		Warning("OpenAL: Error generating a sample's source. Sample will not play.\n");
 		return;
 	}
 
-	m_bReady = InitFormat();
+	alSourcef(source, AL_REFERENCE_DISTANCE, valveUnitsPerMeter);
+	if (alGetError() != AL_NO_ERROR)
+	{
+		Warning("OpenAL: You need to update your audio drivers or OpenAL for sound to work properly.\n");
+	}
 
+	m_bReady = InitFormat();
 	g_OpenALGameSystem.Add(this);
 }
 
 void IOpenALSample::Destroy()
 {
-	m_bFinished = true;
+	m_bFinished = true; // Mark this for deleting and to be ignored by the thread.
 
 	Stop();
-
 	DestroyFormat();
 
-	if (alGetError() != AL_NO_ERROR)
-	{
-		Warning("OpenAL: Error Stopping a sound. Destroying anyway.\n");
-	}
-
 	alDeleteSources(1, &source);
-
 	if (alGetError() != AL_NO_ERROR)
 	{
-		Warning("OpenAL: Error deleting a sound souce. Destroying anyway.\n");
+		Warning("OpenAL: Error deleting a sound source. Destroying anyway.\n");
 	}
 
 	alDeleteBuffers(NUM_BUFFERS, buffers);
-
 	if (alGetError() != AL_NO_ERROR)
 	{
 		Warning("OpenAL: Error deleting buffers. Destroying anyway.\n");
@@ -115,7 +110,6 @@ inline void IOpenALSample::UpdateBuffers(const float updateTime)
 		ALuint buffer;
 
 		alSourceUnqueueBuffers(source, 1, &buffer);
-
 		if (alGetError() != AL_NO_ERROR)
 		{
 			Warning("OpenAL: There was an error unqueuing a buffer. Issues may arise.\n");
@@ -123,10 +117,10 @@ inline void IOpenALSample::UpdateBuffers(const float updateTime)
 
 		active = CheckStream(buffer);
 
+		// I know that this block seems odd, but it's buffer overrun protection. Keep it here.
 		if (active)
 		{
 			alSourceQueueBuffers(source, 1, &buffer);
-
 			if (alGetError() != AL_NO_ERROR)
 			{
 				Warning("OpenAL: There was an error queueing a buffer. Expect some turbulence.\n");
@@ -158,22 +152,35 @@ void IOpenALSample::Play()
 	}
 
 	alSourceQueueBuffers(source, NUM_BUFFERS, buffers);
+	if (alGetError() != AL_NO_ERROR)
+	{
+		Warning("OpenAL: There was an error queueing buffers. This will probably fix itself, but it's still not ideal.\n");
+	}
+
 	alSourcePlay(source);
+	if (alGetError() != AL_NO_ERROR)
+	{
+		Warning("OpenAL: Playing an audio sample failed horribly.\n");
+	}
 }
 
 void IOpenALSample::Stop()
 {
 	if (!IsPlaying())
-	{
-		return; // Why was this called? Useless.
-	}
+		return; // Whachootockinaboutwillis?
 
 	alSourceStop(source);
+	if (alGetError() != AL_NO_ERROR)
+	{
+		Warning("OpenAL: Error stopping a sound. This is less than good news.\n");
+	}
+
 	ClearBuffers();
 }
 
 void IOpenALSample::Pause()
 {
+	Warning("OpenAL: Pausing hasn't been implemented yet?! That's ridiculous...\n");
 }
 
 /***
@@ -216,6 +223,7 @@ bool IOpenALSample::IsPlaying()
 {
 	ALenum state;
 	alGetSourcei(source, AL_SOURCE_STATE, &state);
+	alGetError(); // Spy's sappin' mah error buffer!
 
 	return (state == AL_PLAYING);
 }
@@ -232,6 +240,9 @@ void IOpenALSample::ClearBuffers()
 	}
 
 	alSourcei(source, AL_BUFFER, 0);
+
+	if (alGetError() != AL_NO_ERROR)
+		Warning("OpenAL: An error occured while attempting to clear a source's buffers.\n");
 }
 
 /***
@@ -240,7 +251,6 @@ void IOpenALSample::ClearBuffers()
 void IOpenALSample::BufferData(ALuint bid, ALenum format, const ALvoid* data, ALsizei size, ALsizei freq)
 {
 	alBufferData(bid, format, data, size, freq);
-
 	if (alGetError() != AL_NO_ERROR)
 	{
 		Warning("OpenAL: There was an error buffering audio data. Releasing deadly neurotoxin in 3... 2.. 1..\n");
@@ -248,21 +258,34 @@ void IOpenALSample::BufferData(ALuint bid, ALenum format, const ALvoid* data, AL
 }
 
 /***
- * Methods for updating the source's position/direction/etc
+ * Methods for updating the source's position/velocity/etc
  ***/
 void IOpenALSample::SetPositional(bool positional=false)
 {
+	// We don't need to set positional if we've already done so!
+	if (positional == m_bPositional) return;
+
 	m_bPositional = positional;
 	
 	if (m_bPositional)
 	{
 		m_bRequiresSync = true;
-		alSourcei(source, AL_ROLLOFF_FACTOR, BASE_ROLLOFF_FACTOR);
+		alSourcef(source, AL_ROLLOFF_FACTOR, BASE_ROLLOFF_FACTOR);
+		if (alGetError() != AL_NO_ERROR)
+		{
+			Warning("OpenAL: Couldn't update rolloff factor to enable positional audio.");
+		}
 	}
 	else
 	{
-		alSourcei(source, AL_ROLLOFF_FACTOR, 0);
+		alSourcef(source, AL_ROLLOFF_FACTOR, 0.0f);
+		if (alGetError() != AL_NO_ERROR)
+		{
+			Warning("OpenAL: Couldn't update rolloff factor to disable positional audio.");
+		}
 	}
+
+	m_bRequiresSync = true;
 }
 
 inline void IOpenALSample::UpdatePositional(const float lastUpdate)
@@ -270,7 +293,7 @@ inline void IOpenALSample::UpdatePositional(const float lastUpdate)
 	if (!m_bRequiresSync && !m_bLinkedToEntity) return;
 
 	float position[3];
-	float direction[3];
+	float velocity[3];
 
 	if (m_bPositional)
 	{
@@ -278,9 +301,9 @@ inline void IOpenALSample::UpdatePositional(const float lastUpdate)
 		position[1] = m_fPosition[1];
 		position[2] = m_fPosition[2];
 
-		direction[0] = m_fDirection[0];
-		direction[1] = m_fDirection[1];
-		direction[2] = m_fDirection[2];
+		velocity[0] = m_fVelocity[0];
+		velocity[1] = m_fVelocity[1];
+		velocity[2] = m_fVelocity[2];
 	}
 	else
 	{
@@ -288,18 +311,21 @@ inline void IOpenALSample::UpdatePositional(const float lastUpdate)
 		position[1] = 0.0f;
 		position[2] = 0.0f;
 
-		direction[0] = 0.0f;
-		direction[1] = 0.0f;
-		direction[2] = -1.0f;
+		velocity[0] = 0.0f;
+		velocity[1] = 0.0f;
+		velocity[2] = -1.0f;
 	}
 
 	alSourcefv(source, AL_POSITION,    position);
 	if (alGetError() != AL_NO_ERROR)
 		Warning("OpenAL: Couldn't update a source's position.\n");
-
-	alSourcefv(source, AL_DIRECTION, direction);
+	alSourcefv(source, AL_VELOCITY, velocity);
 	if (alGetError() != AL_NO_ERROR)
-		Warning("OpenAL: Couldn't update a source's direction.\n");
+		Warning("OpenAL: Couldn't update a source's velocity.\n");
+
+	// Another method for converting source data instead of modifying the speed of sound / reference distances is here:
+	// alSource3f(source, AL_POSITION, VALVEUNITS_TO_METERS(pos[0]), VALVEUNITS_TO_METERS(pos[1]), VALVEUNITS_TO_METERS(pos[2]));
+	// alSource3f(source, AL_VELOCITY, VALVEUNITS_TO_METERS(vel[0]), VALVEUNITS_TO_METERS(vel[1]), VALVEUNITS_TO_METERS(vel[2]));
 }
 
 void IOpenALSample::SetPosition(float x, float y, float z)
@@ -329,20 +355,20 @@ void IOpenALSample::SetPosition(const float position[3])
 	m_bRequiresSync = true;
 }
 
-void IOpenALSample::SetDirection(const Vector direction)
+void IOpenALSample::SetVelocity(const Vector velocity)
 {
-	m_fDirection[0] = direction.x;
-	m_fDirection[1] = direction.x;
-	m_fDirection[2] = direction.x;
+	m_fVelocity[0] = velocity.x;
+	m_fVelocity[1] = velocity.x;
+	m_fVelocity[2] = velocity.x;
 
 	m_bRequiresSync = true;
 }
 
-void IOpenALSample::SetDirection(const float direction[3])
+void IOpenALSample::SetVelocity(const float velocity[3])
 {
-	m_fDirection[0] = direction[0];
-	m_fDirection[1] = direction[1];
-	m_fDirection[2] = direction[2];
+	m_fVelocity[0] = velocity[0];
+	m_fVelocity[1] = velocity[1];
+	m_fVelocity[2] = velocity[2];
 
 	m_bRequiresSync = true;
 }
