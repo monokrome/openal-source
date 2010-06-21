@@ -169,7 +169,6 @@ void IOpenALSample::Stop()
 	if (!IsPlaying())
 		return; // Whachootockinaboutwillis?
 
-	// alSourceStop(source); -- Using rewind for now. Fixes a bug with olderOpenAL Soft versions.
 	alSourceRewind(source);
 	if (alGetError() != AL_NO_ERROR)
 	{
@@ -317,16 +316,15 @@ inline void IOpenALSample::UpdatePositional(const float lastUpdate)
 		velocity[2] = 0.0f;
 	}
 
+	// alSource3f(source, AL_POSITION, VALVEUNITS_TO_METERS(position[0]), VALVEUNITS_TO_METERS(position[1]), VALVEUNITS_TO_METERS(position[2]));
 	alSourcefv(source, AL_POSITION,    position);
 	if (alGetError() != AL_NO_ERROR)
 		Warning("OpenAL: Couldn't update a source's position.\n");
+
+	// alSource3f(source, AL_VELOCITY, VALVEUNITS_TO_METERS(velocity[0]), VALVEUNITS_TO_METERS(velocity[1]), VALVEUNITS_TO_METERS(velocity[2]));
 	alSourcefv(source, AL_VELOCITY, velocity);
 	if (alGetError() != AL_NO_ERROR)
 		Warning("OpenAL: Couldn't update a source's velocity.\n");
-
-	// Another method for converting source data instead of modifying the speed of sound / reference distances is here:
-	// alSource3f(source, AL_POSITION, VALVEUNITS_TO_METERS(pos[0]), VALVEUNITS_TO_METERS(pos[1]), VALVEUNITS_TO_METERS(pos[2]));
-	// alSource3f(source, AL_VELOCITY, VALVEUNITS_TO_METERS(vel[0]), VALVEUNITS_TO_METERS(vel[1]), VALVEUNITS_TO_METERS(vel[2]));
 }
 
 void IOpenALSample::SetPosition(float x, float y, float z)

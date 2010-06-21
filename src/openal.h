@@ -8,7 +8,7 @@
 
 
 #define METERS_TO_VALVEUNITS(u) (valveUnitsPerMeter*(u)) // Converts meters to valve units
-#define VALVEUNITS_TO_METERS(u) (0.01905*(u)) // Converts valve units to meters
+#define VALVEUNITS_TO_METERS(u) (0.01905f*(u)) // Converts valve units to meters
 #define BASE_ROLLOFF_FACTOR 1.0f
 
 // @see http://developer.valvesoftware.com/wiki/Dimensions

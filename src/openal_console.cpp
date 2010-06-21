@@ -44,10 +44,11 @@ void OpenALPositionalDemoPlay(void)
 	}
 	else
 	{
+		Msg("OpenAL: Demo can't find local player. Global enabled.\n");
 		oggSample.SetPositional(false);
 	}
 
-	oggSample.Open("music/binarpilot/defrag/01 Goof.ogg");
+	oggSample.Open("demo/positional.ogg");
 
 	if (oggSample.IsReady())
 		oggSample.Play();
