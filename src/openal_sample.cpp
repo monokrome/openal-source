@@ -8,16 +8,16 @@ IOpenALSample::IOpenALSample()
 	m_bFinished = false;
 	m_bLooping = false;
 	m_bReady = false;
+	m_bRequiresSync = true;
+	m_bLinkedToEntity = false;
+	m_bPositional = false;
 
 	m_fPosition[0] = 0.0f;
 	m_fPosition[1] = 0.0f;
 	m_fPosition[2] = 0.0f;
-	m_fOrientation[0] = 0.0f;
-	m_fOrientation[1] = 0.0f;
-	m_fOrientation[2] = -1.0f;
-	m_fOrientation[3] = 0.0f;
-	m_fOrientation[4] = 0.0f;
-	m_fOrientation[5] = 0.0f;
+	m_fDirection[0] = 0.0f;
+	m_fDirection[1] = 0.0f;
+	m_fDirection[2] = 1.0f;
 }
 
 IOpenALSample::~IOpenALSample()
@@ -78,9 +78,6 @@ void IOpenALSample::Destroy()
 
 void IOpenALSample::Update(const float updateTime)
 {
-	int state, processed;
-	bool active = false;
-
 	if (m_bFinished)
 	{
 		Destroy();
@@ -94,10 +91,19 @@ void IOpenALSample::Update(const float updateTime)
 	}
 
 	/***
-	 * Do any processing that needs to be done for positional audio before we start
-	 * messing with the buffers.
+	 * Let's do any processing that needs to be done for syncronizing with the game engine
+	 * prior to working on the buffers.
 	 ***/
 	UpdatePositional(updateTime);
+	UpdateBuffers(updateTime);
+
+	m_bRequiresSync = false;
+}
+
+inline void IOpenALSample::UpdateBuffers(const float updateTime)
+{
+	int state, processed;
+	bool active = false;
 
 	alGetSourcei(source, AL_SOURCE_STATE, &state);
 	alGetSourcei(source, AL_BUFFERS_PROCESSED, &processed);
@@ -179,6 +185,14 @@ bool IOpenALSample::IsReady()
 }
 
 /***
+ * Is this a positional sound?
+ ***/
+bool IOpenALSample::IsPositional()
+{
+	return m_bPositional;
+}
+
+/***
  * This basically marks the sample for safe deletion so that threading
  * doesn't run into issues by trying to access a dead sample.
  ***/
@@ -234,15 +248,120 @@ void IOpenALSample::BufferData(ALuint bid, ALenum format, const ALvoid* data, AL
 }
 
 /***
- * Methods for updating the source's position/orientation/etc
+ * Methods for updating the source's position/direction/etc
  ***/
+void IOpenALSample::SetPositional(bool positional=false)
+{
+	m_bPositional = positional;
+	
+	if (m_bPositional)
+	{
+		m_bRequiresSync = true;
+		alSourcei(source, AL_ROLLOFF_FACTOR, BASE_ROLLOFF_FACTOR);
+	}
+	else
+	{
+		alSourcei(source, AL_ROLLOFF_FACTOR, 0);
+	}
+}
+
 inline void IOpenALSample::UpdatePositional(const float lastUpdate)
 {
-	if (!m_bPositional)
+	if (!m_bRequiresSync && !m_bLinkedToEntity) return;
+
+	float position[3];
+	float direction[3];
+
+	if (m_bPositional)
 	{
-		return;
+		position[0] = m_fPosition[0];
+		position[1] = m_fPosition[1];
+		position[2] = m_fPosition[2];
+
+		direction[0] = m_fDirection[0];
+		direction[1] = m_fDirection[1];
+		direction[2] = m_fDirection[2];
+	}
+	else
+	{
+		position[0] = 0.0f;
+		position[1] = 0.0f;
+		position[2] = 0.0f;
+
+		direction[0] = 0.0f;
+		direction[1] = 0.0f;
+		direction[2] = -1.0f;
 	}
 
-	alSourcefv(source, AL_POSITION,    &m_fPosition);
-	alSourcefv(source, AL_ORIENTATION, &m_fOrientation);
+	alSourcefv(source, AL_POSITION,    position);
+	if (alGetError() != AL_NO_ERROR)
+		Warning("OpenAL: Couldn't update a source's position.\n");
+
+	alSourcefv(source, AL_DIRECTION, direction);
+	if (alGetError() != AL_NO_ERROR)
+		Warning("OpenAL: Couldn't update a source's direction.\n");
+}
+
+void IOpenALSample::SetPosition(float x, float y, float z)
+{
+	m_fPosition[0] = x;
+	m_fPosition[1] = y;
+	m_fPosition[2] = z;
+
+	m_bRequiresSync = true;
+}
+
+void IOpenALSample::SetPosition(Vector position)
+{
+	m_fPosition[0] = position.x;
+	m_fPosition[1] = position.y;
+	m_fPosition[2] = position.z;
+
+	m_bRequiresSync = true;
+}
+
+void IOpenALSample::SetPosition(const float position[3])
+{
+	m_fPosition[0] = position[0];
+	m_fPosition[1] = position[1];
+	m_fPosition[2] = position[2];
+
+	m_bRequiresSync = true;
+}
+
+void IOpenALSample::SetDirection(const Vector direction)
+{
+	m_fDirection[0] = direction.x;
+	m_fDirection[1] = direction.x;
+	m_fDirection[2] = direction.x;
+
+	m_bRequiresSync = true;
+}
+
+void IOpenALSample::SetDirection(const float direction[3])
+{
+	m_fDirection[0] = direction[0];
+	m_fDirection[1] = direction[1];
+	m_fDirection[2] = direction[2];
+
+	m_bRequiresSync = true;
+}
+
+/***
+ * This provides a special case where you can simply link an entity to the sample, and
+ * the sample's update methods will go ahead and take care of the rest.
+ ***/
+void IOpenALSample::LinkEntity(CBaseEntity *ent)
+{
+	if (!ent)
+		Warning("OpenAL: Couldn't properly link an entity to a source. Ignoring request.\n");
+
+	m_bLinkedToEntity = true;
+	m_pLinkedEntity = ent;
+}
+
+void IOpenALSample::UnlinkEntity()
+{
+	m_bLinkedToEntity = false;
+	m_pLinkedEntity = NULL;
 }

@@ -16,6 +16,7 @@ public:
 	void Destroy();
 
 	void Update(const float lastUpdate);
+	inline void UpdateBuffers(const float lastUpdate);
 	inline void UpdatePositional(const float lastUpdate);
 
 	void Play();
@@ -25,9 +26,17 @@ public:
 	bool IsPlaying();
 	bool IsReady();
 	bool IsFinished();
+	bool IsPositional();
 
-	void SetPosition(const Vector position);
+	void LinkEntity(CBaseEntity* ent);
+	void UnlinkEntity();
+
+	void SetPositional(bool positional);
+	void SetPosition(float x, float y, float z);
+	void SetPosition(Vector position);
 	void SetPosition(const float position[3]);
+	void SetDirection(const float orientation[3]);
+	void SetDirection(const Vector direction);
 
 	void SetLooping(bool shouldLoop);
 	void ClearBuffers();
@@ -58,10 +67,11 @@ protected:
 	bool m_bFinished;  // Are we finished playing this sound? Can we delete this?
 	bool m_bLooping;   // Is this sample in a constant looping state?
 	bool m_bReady;     // Are we ready to play this file?
+	bool m_bRequiresSync; // If this is true, we syncronize with the engine.
 
 	bool m_bPositional; // Are we placed in a world position?
 	float m_fPosition[3]; // Where is this sample source?
-	float m_fOrientation[6]; // In which direction is our source playing?
+	float m_fDirection[3]; // In which direction is our source playing?
 
 	bool m_bLinkedToEntity; // Are we currently linked to an entity for position/orientation?
 	CBaseEntity* m_pLinkedEntity; // Used for linking entities to this sample's source

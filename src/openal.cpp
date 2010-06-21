@@ -8,6 +8,10 @@
 COpenALUpdateThread    g_OpenALUpdateThread;
 COpenALGameSystem      g_OpenALGameSystem;
 
+// @see http://developer.valvesoftware.com/wiki/Dimensions
+const float valveUnitsPerMeter = 1 / 0.01905;
+const float valveSpeedOfSound = VALVEUNITS_TO_METERS(340.29);
+
 /**********
  * Methods for the OpenAL manager itself.
  **********/
@@ -55,10 +59,17 @@ bool COpenALGameSystem::Init()
 
 	// Initialize this to zero in order to prevent loud audio before we get the volume ConVar(s).
 	alListenerfv(AL_GAIN, &gain);
-	
 	if (alGetError() != AL_NO_ERROR)
 	{
 		Warning("OpenAL: Couldn't change gain? This could get loud... Continuing without regard.\n");
+	}
+
+	// Set up the speed of sound. If this doesn't work right, you have old drivers.
+	alSpeedOfSound(valveSpeedOfSound);
+	if (alGetError() != AL_NO_ERROR)
+	{
+		Warning("OpenAL: You need to update your audio drivers or OpenAL for sound to work properly.\n");
+		return false;
 	}
 
 	m_bInitialized = true;
@@ -162,8 +173,16 @@ inline void COpenALGameSystem::UpdateListener(const float frametime)
 	}
 
 	alListenerfv(AL_POSITION,    position);
+	if (alGetError() != AL_NO_ERROR)
+		Warning("OpenAL: Couldn't update the listener's position.\n");
+
 	alListenerfv(AL_ORIENTATION, orientation);
+	if (alGetError() != AL_NO_ERROR)
+		Warning("OpenAL: Couldn't update the listener's orientation.\n");
+
 	alListenerfv(AL_GAIN,        &gain);
+	if (alGetError() != AL_NO_ERROR)
+		Warning("OpenAL: Couldn't properly set the listener's gain.\n");
 }
 
 /***

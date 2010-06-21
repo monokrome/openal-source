@@ -6,6 +6,11 @@
 #include "AL/al.h"
 #include "AL/alc.h"
 
+
+#define METERS_TO_VALVEUNITS(u) valveUnitsPerMeter*u // Converts meters to valve units
+#define VALVEUNITS_TO_METERS(u) 0.01905*u // Converts valve units to meters
+#define BASE_ROLLOFF_FACTOR 1.0f
+
 #ifndef CLIENT_DLL
 #error You don't need OpenAL on the server. Only compile it for the client.
 #endif
@@ -65,7 +70,6 @@ public:
 	void OnExit();
 };
 
-extern COpenALUpdateThread    g_OpenALUpdateThread;
 extern COpenALGameSystem      g_OpenALGameSystem;
 
 #endif
