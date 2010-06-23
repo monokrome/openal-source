@@ -4,12 +4,12 @@ Embeds OpenAL into the Source Engine with a few other useful/related tools.
 Features:
 - Audio moves at the speed of sound and respects the doppler effect
 - OggVorbis Playback
+- Links audio sources to entities so that they are consistently in sync
 - Audio can be local to the player or positional
   - Uses for "local" audio include a media players, in-game radio, etc.
   - Positional audio can be used to add depth to an environment
 
 Coming:
-- Linking audio sources to entities so that they are consistently in sync
 - Audio groups, so that we can arrange sources more nicely
 - More in-game syncronization possibly including:
   - Under water audio distortion
