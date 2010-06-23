@@ -9,8 +9,10 @@ IOpenALSample::IOpenALSample()
 	m_bLooping = false;
 	m_bReady = false;
 	m_bRequiresSync = true;
-	m_bLinkedToEntity = false;
 	m_bPositional = false;
+
+	m_fGain = 1.0;
+	m_fFadeScalar = 1.0;
 
 	m_fPosition[0] = 0.0f;
 	m_fPosition[1] = 0.0f;
@@ -292,20 +294,34 @@ void IOpenALSample::SetPositional(bool positional=false)
 
 inline void IOpenALSample::UpdatePositional(const float lastUpdate)
 {
-	if (!m_bRequiresSync && !m_bLinkedToEntity) return;
+	if (!m_bRequiresSync && !m_pLinkedEntity) return;
 
 	float position[3];
 	float velocity[3];
 
 	if (m_bPositional)
 	{
-		position[0] = m_fPosition[0];
-		position[1] = m_fPosition[1];
-		position[2] = m_fPosition[2];
+		if (m_pLinkedEntity != NULL)
+		{
+			position[0] = m_fPosition[0];
+			position[1] = m_fPosition[1];
+			position[2] = m_fPosition[2];
 
-		velocity[0] = m_fVelocity[0];
-		velocity[1] = m_fVelocity[1];
-		velocity[2] = m_fVelocity[2];
+			velocity[0] = m_fVelocity[0];
+			velocity[1] = m_fVelocity[1];
+			velocity[2] = m_fVelocity[2];
+		}
+		else
+		{
+			// TODO: Provide methods for better control of this position
+			position[0] = m_pLinkedEntity->GetAbsOrigin().x;
+			position[1] = m_pLinkedEntity->GetAbsOrigin().y;
+			position[2] = m_pLinkedEntity->GetAbsOrigin().y;
+
+			velocity[0] = m_pLinkedEntity->GetAbsVelocity().x;
+			velocity[1] = m_pLinkedEntity->GetAbsVelocity().y;
+			velocity[2] = m_pLinkedEntity->GetAbsVelocity().z;
+		}
 	}
 	else
 	{
@@ -383,12 +399,10 @@ void IOpenALSample::LinkEntity(CBaseEntity *ent)
 	if (!ent)
 		Warning("OpenAL: Couldn't properly link an entity to a source. Ignoring request.\n");
 
-	m_bLinkedToEntity = true;
 	m_pLinkedEntity = ent;
 }
 
 void IOpenALSample::UnlinkEntity()
 {
-	m_bLinkedToEntity = false;
 	m_pLinkedEntity = NULL;
 }

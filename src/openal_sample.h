@@ -68,12 +68,13 @@ protected:
 	bool m_bLooping;   // Is this sample in a constant looping state?
 	bool m_bReady;     // Are we ready to play this file?
 	bool m_bRequiresSync; // If this is true, we syncronize with the engine.
-
 	bool m_bPositional; // Are we placed in a world position?
+
 	float m_fPosition[3]; // Where is this sample source?
 	float m_fVelocity[3]; // In which velocity is our source playing?
+	float m_fGain; // This is the gain of our sound
+	float m_fFadeScalar; // The gain of our sound is multiplied by this
 
-	bool m_bLinkedToEntity; // Are we currently linked to an entity for position/orientation?
 	CBaseEntity* m_pLinkedEntity; // Used for linking entities to this sample's source
 
 	ALuint buffers[NUM_BUFFERS];  // Buffers to queue our data into
