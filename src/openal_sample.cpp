@@ -299,9 +299,20 @@ inline void IOpenALSample::UpdatePositional(const float lastUpdate)
 	float position[3];
 	float velocity[3];
 
-	if (m_bPositional)
+	if (m_pLinkedEntity)
 	{
-		if (m_pLinkedEntity != NULL)
+			// TODO: Provide methods for better control of this position
+			position[0] = m_pLinkedEntity->GetAbsOrigin().x;
+			position[1] = m_pLinkedEntity->GetAbsOrigin().y;
+			position[2] = m_pLinkedEntity->GetAbsOrigin().y;
+
+			velocity[0] = m_pLinkedEntity->GetAbsVelocity().x;
+			velocity[1] = m_pLinkedEntity->GetAbsVelocity().y;
+			velocity[2] = m_pLinkedEntity->GetAbsVelocity().z;
+	}
+	else
+	{
+		if (m_bPositional)
 		{
 			position[0] = m_fPosition[0];
 			position[1] = m_fPosition[1];
@@ -313,25 +324,14 @@ inline void IOpenALSample::UpdatePositional(const float lastUpdate)
 		}
 		else
 		{
-			// TODO: Provide methods for better control of this position
-			position[0] = m_pLinkedEntity->GetAbsOrigin().x;
-			position[1] = m_pLinkedEntity->GetAbsOrigin().y;
-			position[2] = m_pLinkedEntity->GetAbsOrigin().y;
+			position[0] = 0.0f;
+			position[1] = 0.0f;
+			position[2] = 0.0f;
 
-			velocity[0] = m_pLinkedEntity->GetAbsVelocity().x;
-			velocity[1] = m_pLinkedEntity->GetAbsVelocity().y;
-			velocity[2] = m_pLinkedEntity->GetAbsVelocity().z;
+			velocity[0] = 0.0f;
+			velocity[1] = 0.0f;
+			velocity[2] = 0.0f;
 		}
-	}
-	else
-	{
-		position[0] = 0.0f;
-		position[1] = 0.0f;
-		position[2] = 0.0f;
-
-		velocity[0] = 0.0f;
-		velocity[1] = 0.0f;
-		velocity[2] = 0.0f;
 	}
 
 	// alSource3f(source, AL_POSITION, VALVEUNITS_TO_METERS(position[0]), VALVEUNITS_TO_METERS(position[1]), VALVEUNITS_TO_METERS(position[2]));
