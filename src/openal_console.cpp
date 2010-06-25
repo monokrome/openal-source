@@ -4,19 +4,20 @@
 #include "openal_oggsample.h"
 #include "c_basehlplayer.h"
 
+#define OGG_DEMO_FILENAME "demo/demo.ogg"
+#define POS_DEMO_FILENAME "demo/positional.ogg"
+
 COpenALOggSample oggSample;
 
 void OpenALOggDemoPlay(void)
 {
-	Msg("Initializing demo of OpenAL/OggVorbis support.\n");
-
 	if (oggSample.IsReady())
 		oggSample.Close();
 
 	oggSample.SetLooping(true);
 	oggSample.SetPositional(false);
 	
-	oggSample.Open("music/binarpilot/defrag/01 Goof.ogg");
+	oggSample.Open(OGG_DEMO_FILENAME);
 
 	if (oggSample.IsReady())
 		oggSample.Play();
@@ -48,7 +49,7 @@ void OpenALPositionalDemoPlay(void)
 		oggSample.SetPositional(false);
 	}
 
-	oggSample.Open("demo/positional.ogg");
+	oggSample.Open(POS_DEMO_FILENAME);
 
 	if (oggSample.IsReady())
 		oggSample.Play();
