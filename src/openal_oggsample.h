@@ -20,6 +20,7 @@ public:
 	virtual void Close();
 
 	bool CheckStream(ALuint buffer);
+	void UpdateMetadata();
 
 private:
 	FileHandle_t oggFile;

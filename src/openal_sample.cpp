@@ -20,6 +20,8 @@ IOpenALSample::IOpenALSample()
 	m_fVelocity[0] = 0.0f;
 	m_fVelocity[1] = 0.0f;
 	m_fVelocity[2] = 0.0f;
+
+	metadata = new KeyValues("Metadata");
 }
 
 IOpenALSample::~IOpenALSample()
@@ -407,4 +409,12 @@ void IOpenALSample::LinkEntity(CBaseEntity *ent)
 void IOpenALSample::UnlinkEntity()
 {
 	m_pLinkedEntity = NULL;
+}
+
+/***
+ * Methods for working with metadata
+ ***/
+void IOpenALSample::ClearMetadata()
+{
+	metadata->Clear();
 }

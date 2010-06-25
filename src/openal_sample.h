@@ -2,6 +2,7 @@
 #define __OPENAL_SAMPLE_H
 
 #include "AL/al.h"
+#include "KeyValues.h"
 
 #define NUM_BUFFERS 4
 #define BUFFER_SIZE 65536 // 65536 bytes = 64KB
@@ -52,6 +53,8 @@ public:
 
 	virtual bool CheckStream(ALuint buffer) = 0;
 
+	virtual void UpdateMetadata() {};
+	void ClearMetadata();
 
 	/***
 	 * This is rarely ever used, but allows some interesting possibilities with very few
@@ -61,6 +64,8 @@ public:
 	 * rarely ever used but potentially disco.
 	 ***/
 	virtual void UpdateFormat(const float updateTime) {};
+
+	CBaseEntity* m_pLinkedEntity; // Used for linking entities to this sample's source
 
 protected:
 	bool m_bStreaming; // Are we in streaming mode, or should we preload the data?
@@ -75,7 +80,7 @@ protected:
 	float m_fGain; // This is the gain of our sound
 	float m_fFadeScalar; // The gain of our sound is multiplied by this
 
-	CBaseEntity* m_pLinkedEntity; // Used for linking entities to this sample's source
+	KeyValues* metadata; // Metadata about the audio
 
 	ALuint buffers[NUM_BUFFERS];  // Buffers to queue our data into
 	ALuint source;                // Our source's identifier for OpenAL

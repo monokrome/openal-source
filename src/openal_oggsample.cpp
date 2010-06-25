@@ -1,6 +1,7 @@
 #include "cbase.h"
 #include "openal.h"
 #include "openal_oggsample.h"
+#include "KeyValues.h"
 
 // We are declaring some utility functions in order to help ogg know how to use
 // the Source engine's filesystem functionality instead of standard I/O methods.
@@ -50,10 +51,9 @@ void COpenALOggSample::Open(const char* filename)
 	vorbisInfo = ov_info(&oggSample, -1);
 	vorbisComment = ov_comment(&oggSample, -1);
 
-	for (int i=0; i < vorbisComment->comments; i++)
-	{
-		Warning("Comment: %s\n", vorbisComment->user_comments[i]);
-	}
+	ClearMetadata();
+
+	UpdateMetadata();
 
 		// And now we can figure out what format this sample is
 	if (vorbisInfo->channels == 1)
@@ -173,4 +173,33 @@ int vorbis_seek_func(void *datasource, ogg_int64_t offset, int whence)
 long vorbis_tell_func(void *datasource)
 {
 	return filesystem->Tell((FileHandle_t*) datasource);
+}
+
+void COpenALOggSample::UpdateMetadata()
+{
+	char *thisKey, *thisValue;
+	int i, count;
+
+	ClearMetadata();
+
+	for (i=0; i < vorbisComment->comments; ++i)
+	{
+		for (count=0; count < vorbisComment->comment_lengths[i]; ++count)
+		{
+			if (vorbisComment->user_comments[i][count] == '=')
+				break;
+		}
+
+		// This could probably be done more easily in non-C code
+		thisKey = (char*) malloc(count+1);
+		Q_strncpy(thisKey, vorbisComment->user_comments[i], count+1);
+
+		thisValue = (char*) malloc(vorbisComment->comment_lengths[i]-(count+1));
+		Q_strncpy(thisValue, vorbisComment->user_comments[i]+(count+1), vorbisComment->comment_lengths[i]-(count));
+
+		metadata->SetString(thisKey, thisValue);
+
+		free(thisKey);
+		free(thisValue);
+	}
 }
