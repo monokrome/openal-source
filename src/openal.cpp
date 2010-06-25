@@ -3,7 +3,7 @@
 #include "c_basehlplayer.h" // For listener syncronization
 
 // This will tell OpenAL to start running the demo automatically.
-//#define OPENAL_AUTOSTART_DEMO
+#define OPENAL_AUTOSTART_DEMO
 
 COpenALUpdateThread    g_OpenALUpdateThread;
 COpenALGameSystem      g_OpenALGameSystem;
@@ -23,6 +23,7 @@ bool COpenALGameSystem::Add(IOpenALSample *sample)
 {
 	AUTO_LOCK_FM(m_vSamples);
 	m_vSamples.InsertBefore(0, sample);
+
 	return true;
 }
 
