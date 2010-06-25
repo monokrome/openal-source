@@ -50,6 +50,11 @@ void COpenALOggSample::Open(const char* filename)
 	vorbisInfo = ov_info(&oggSample, -1);
 	vorbisComment = ov_comment(&oggSample, -1);
 
+	for (int i=0; i < vorbisComment->comments; i++)
+	{
+		Warning("Comment: %s\n", vorbisComment->user_comments[i]);
+	}
+
 		// And now we can figure out what format this sample is
 	if (vorbisInfo->channels == 1)
 		format = AL_FORMAT_MONO16;
@@ -106,13 +111,7 @@ bool COpenALOggSample::CheckStream(ALuint buffer)
 		result = ov_time_seek(&oggSample, 0);
 
 		if (result < 0)
-		{
 			Warning("Ogg: An error occured while attempting to perform a seek on a sample.\n");
-		}
-		else
-		{
-			DevMsg("Ogg: Successfully looped.\n");
-		}
 	}
 
 	BufferData(buffer, format, data, size, vorbisInfo->rate);

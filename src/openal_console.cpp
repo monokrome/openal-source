@@ -16,7 +16,7 @@ void OpenALOggDemoPlay(void)
 	oggSample.SetLooping(true);
 	oggSample.SetPositional(false);
 	
-	oggSample.Open("demo/demo.ogg");
+	oggSample.Open("music/binarpilot/defrag/01 Goof.ogg");
 
 	if (oggSample.IsReady())
 		oggSample.Play();

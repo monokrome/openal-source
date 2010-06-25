@@ -10,7 +10,7 @@ class IOpenALSample
 {
 public:
 	IOpenALSample();
-	~IOpenALSample();
+	virtual ~IOpenALSample();
 
 	void Init();
 	void Destroy();

@@ -237,7 +237,7 @@ void IOpenALSample::ClearBuffers()
 {
 	if (IsPlaying())
 	{
-		Warning("OpenAL: ClearBuffers() called while playing. Sample will stop now.\n");
+		DevMsg("OpenAL: ClearBuffers() called while playing. Sample will stop now.\n");
 		Stop();
 	}
 
@@ -343,6 +343,8 @@ inline void IOpenALSample::UpdatePositional(const float lastUpdate)
 	alSourcefv(source, AL_VELOCITY, velocity);
 	if (alGetError() != AL_NO_ERROR)
 		Warning("OpenAL: Couldn't update a source's velocity.\n");
+
+	alSourcef(source, AL_GAIN, m_fGain * m_fFadeScalar);
 }
 
 void IOpenALSample::SetPosition(float x, float y, float z)
