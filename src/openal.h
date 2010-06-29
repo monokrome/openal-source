@@ -9,15 +9,21 @@
 
 #define METERS_TO_VALVEUNITS(u) (valveUnitsPerMeter*(u)) // Converts meters to valve units
 #define VALVEUNITS_TO_METERS(u) (0.01905f*(u)) // Converts valve units to meters
-#define BASE_ROLLOFF_FACTOR 1.0f
 
 // @see http://developer.valvesoftware.com/wiki/Dimensions
+const float baseRolloffFactor = 1.0f;
 const float valveUnitsPerMeter = 1 / 0.01905;
 const float valveSpeedOfSound = METERS_TO_VALVEUNITS(340.29);
 
 #ifndef CLIENT_DLL
 #error You don't need OpenAL on the server. Only compile it for the client.
 #endif
+
+typedef struct
+{
+	char* name; // The full-text name of this group
+	CUtlVectorMT<CUtlVector<IOpenALSample*>> samples;
+} openal_groupdata_t;
 
 /***
  * An implementation of OpenAL in the SDK environment, since Source doesn't provide access
@@ -44,9 +50,19 @@ public:
 
 	bool Add(IOpenALSample* sample);
 
+	IOpenALSample* GetSample(char* filename);
+
 	const char *Name() { return "OpenALGameSystem"; }
 
 	void GetSoundPath(const char* relativePath, char* buffer, size_t bufferSize);
+
+	/***
+	 * Methods for working with groups.
+	 ***/
+	openal_groupdata_t* FindGroup(char* name);
+	void RemoveSampleGroup(char* name);
+	void AddSampleToGroup(char* groupName, IOpenALSample *sample);
+	void RemoveSampleFromGroup(char* groupName, IOpenALSample *sample);
 
 private:
 	ALCcontext *m_alContext;
@@ -54,6 +70,8 @@ private:
 	bool m_bInitialized;
 
 	CUtlVectorMT<CUtlVector<IOpenALSample*>> m_vSamples;
+	CUtlLinkedList<openal_groupdata_t*> m_AudioGroups;
+	openal_groupdata_t* m_grpGlobal;
 };
 
 /***

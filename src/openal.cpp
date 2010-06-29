@@ -1,6 +1,7 @@
 #include "cbase.h"
 #include "openal.h"
 #include "c_basehlplayer.h" // For listener syncronization
+#include "openal_oggsample.h"
 
 // This will tell OpenAL to start running the demo automatically.
 #define OPENAL_AUTOSTART_DEMO
@@ -13,6 +14,11 @@ COpenALGameSystem      g_OpenALGameSystem;
  **********/
 COpenALGameSystem::COpenALGameSystem()
 {
+	m_grpGlobal = new openal_groupdata_t;
+	m_grpGlobal->name = "global";
+
+	// Create a default sample group that contains rendered samples
+	m_AudioGroups.AddToTail(m_grpGlobal);
 }
 
 COpenALGameSystem::~COpenALGameSystem()
@@ -22,7 +28,8 @@ COpenALGameSystem::~COpenALGameSystem()
 bool COpenALGameSystem::Add(IOpenALSample *sample)
 {
 	AUTO_LOCK_FM(m_vSamples);
-	m_vSamples.InsertBefore(0, sample);
+	m_vSamples.AddToTail(sample);
+	m_grpGlobal->samples.AddToTail(sample);
 
 	return true;
 }
@@ -108,6 +115,14 @@ void COpenALGameSystem::Shutdown()
 		alcCloseDevice(m_alDevice);
 		m_alDevice = NULL;
 	}
+
+	FOR_EACH_LL(m_AudioGroups, i)
+	{
+		openal_groupdata_t* groupData = m_AudioGroups[i];
+		delete groupData;
+	}
+
+	m_AudioGroups.RemoveAll();
 }
 
 
@@ -223,6 +238,26 @@ void COpenALGameSystem::GetSoundPath(const char* relativePath, char* buffer, siz
   }
 }
 
+/***
+ * Methods for managing samples
+ ***/
+IOpenALSample* COpenALGameSystem::GetSample(char* filename)
+{
+/*
+	IOpenALSample* theSample;
+
+	theSample = new COpenALOggSample();
+	theSample->Open(filename);
+
+	if (!theSample->IsReady())
+		delete theSample;
+
+	return theSample;
+*/
+	Warning("OpenAL: GetSample() is not yet implemented.\n");
+	return NULL;
+}
+
 /*********
  * Methods for the update thread.
  *********/
@@ -267,4 +302,48 @@ int COpenALUpdateThread::Run()
 	}
 
 	return 0;
+}
+
+/***
+ * Group management.
+ ***/
+openal_groupdata_t* COpenALGameSystem::FindGroup(char* name)
+{
+	openal_groupdata_t* theGroup;
+
+	FOR_EACH_LL(m_AudioGroups, i)
+	{
+		if (m_AudioGroups[i]->name == name)
+		{
+			return m_AudioGroups[i];
+		}
+	}
+
+	theGroup = new openal_groupdata_t;
+
+	theGroup->name = name;
+	return theGroup;
+}
+
+void COpenALGameSystem::RemoveSampleGroup(char* name)
+{
+	openal_groupdata_t* theGroup = FindGroup(name);
+
+	m_AudioGroups.FindAndRemove(theGroup);
+}
+
+void COpenALGameSystem::AddSampleToGroup(char* groupName, IOpenALSample *sample)
+{
+	openal_groupdata_t* theGroup = FindGroup(groupName);
+
+	AUTO_LOCK_FM(theGroup->samples);
+	theGroup->samples.AddToTail(sample);
+}
+
+void COpenALGameSystem::RemoveSampleFromGroup(char* groupName, IOpenALSample *sample)
+{
+	openal_groupdata_t* theGroup = FindGroup(groupName);
+
+	AUTO_LOCK_FM(theGroup->samples);
+	theGroup->samples.FindAndRemove(sample);
 }
