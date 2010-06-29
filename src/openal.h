@@ -63,6 +63,7 @@ public:
 	void RemoveSampleGroup(char* name);
 	void AddSampleToGroup(char* groupName, IOpenALSample *sample);
 	void RemoveSampleFromGroup(char* groupName, IOpenALSample *sample);
+	int RemoveEmptyGroups();
 
 private:
 	ALCcontext *m_alContext;

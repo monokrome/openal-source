@@ -203,6 +203,8 @@ inline void COpenALGameSystem::UpdateListener(const float frametime)
  ***/
 void COpenALGameSystem::UpdateSamples(const float updateTime)
 {
+	RemoveEmptyGroups();
+
 	/**
 	 * For safe thread execution, we need to lock the Vector before accessing it.
 	 * This macro declares a class with inline constructors/destructors allowing
@@ -258,6 +260,67 @@ IOpenALSample* COpenALGameSystem::GetSample(char* filename)
 	return NULL;
 }
 
+/***
+ * Group management.
+ ***/
+openal_groupdata_t* COpenALGameSystem::FindGroup(char* name)
+{
+	openal_groupdata_t* theGroup;
+
+	FOR_EACH_LL(m_AudioGroups, i)
+	{
+		if (m_AudioGroups[i]->name == name)
+		{
+			return m_AudioGroups[i];
+		}
+	}
+
+	theGroup = new openal_groupdata_t;
+
+	theGroup->name = name;
+	return theGroup;
+}
+
+void COpenALGameSystem::RemoveSampleGroup(char* name)
+{
+	openal_groupdata_t* theGroup = FindGroup(name);
+
+	m_AudioGroups.FindAndRemove(theGroup);
+}
+
+void COpenALGameSystem::AddSampleToGroup(char* groupName, IOpenALSample *sample)
+{
+	openal_groupdata_t* theGroup = FindGroup(groupName);
+
+	AUTO_LOCK_FM(theGroup->samples);
+	theGroup->samples.AddToTail(sample);
+}
+
+void COpenALGameSystem::RemoveSampleFromGroup(char* groupName, IOpenALSample *sample)
+{
+	openal_groupdata_t* theGroup = FindGroup(groupName);
+
+	AUTO_LOCK_FM(theGroup->samples);
+	theGroup->samples.FindAndRemove(sample);
+}
+
+int COpenALGameSystem::RemoveEmptyGroups()
+{
+	int removalCount = 0;
+
+	FOR_EACH_LL(m_AudioGroups, i)
+	{
+		if (m_AudioGroups[i]->samples.Count() < 1 && m_AudioGroups[i] != m_grpGlobal)
+		{
+			m_AudioGroups[i]->samples.RemoveAll();
+			++removalCount;	
+		}
+	}
+
+	return removalCount;
+}
+
+
 /*********
  * Methods for the update thread.
  *********/
@@ -302,48 +365,4 @@ int COpenALUpdateThread::Run()
 	}
 
 	return 0;
-}
-
-/***
- * Group management.
- ***/
-openal_groupdata_t* COpenALGameSystem::FindGroup(char* name)
-{
-	openal_groupdata_t* theGroup;
-
-	FOR_EACH_LL(m_AudioGroups, i)
-	{
-		if (m_AudioGroups[i]->name == name)
-		{
-			return m_AudioGroups[i];
-		}
-	}
-
-	theGroup = new openal_groupdata_t;
-
-	theGroup->name = name;
-	return theGroup;
-}
-
-void COpenALGameSystem::RemoveSampleGroup(char* name)
-{
-	openal_groupdata_t* theGroup = FindGroup(name);
-
-	m_AudioGroups.FindAndRemove(theGroup);
-}
-
-void COpenALGameSystem::AddSampleToGroup(char* groupName, IOpenALSample *sample)
-{
-	openal_groupdata_t* theGroup = FindGroup(groupName);
-
-	AUTO_LOCK_FM(theGroup->samples);
-	theGroup->samples.AddToTail(sample);
-}
-
-void COpenALGameSystem::RemoveSampleFromGroup(char* groupName, IOpenALSample *sample)
-{
-	openal_groupdata_t* theGroup = FindGroup(groupName);
-
-	AUTO_LOCK_FM(theGroup->samples);
-	theGroup->samples.FindAndRemove(sample);
 }
