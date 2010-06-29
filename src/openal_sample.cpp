@@ -107,8 +107,6 @@ inline void IOpenALSample::UpdateBuffers(const float updateTime)
 	alGetSourcei(source, AL_SOURCE_STATE, &state);
 	alGetSourcei(source, AL_BUFFERS_PROCESSED, &processed);
 
-	UpdateFormat(updateTime);
-
 	while (processed--)
 	{
 		ALuint buffer;
@@ -252,9 +250,9 @@ void IOpenALSample::ClearBuffers()
 /***
  * Keep those buffers flowing.
  ***/
-void IOpenALSample::BufferData(ALuint bid, ALenum format, const ALvoid* data, ALsizei size, ALsizei freq)
+void IOpenALSample::BufferData(ALuint bufferID, ALenum format, const ALvoid* data, ALsizei size, ALsizei freq)
 {
-	alBufferData(bid, format, data, size, freq);
+	alBufferData(bufferID, format, data, size, freq);
 	if (alGetError() != AL_NO_ERROR)
 	{
 		Warning("OpenAL: There was an error buffering audio data. Releasing deadly neurotoxin in 3... 2.. 1..\n");
@@ -409,12 +407,4 @@ void IOpenALSample::LinkEntity(CBaseEntity *ent)
 void IOpenALSample::UnlinkEntity()
 {
 	m_pLinkedEntity = NULL;
-}
-
-/***
- * Methods for working with metadata
- ***/
-void IOpenALSample::ClearMetadata()
-{
-	metadata->Clear();
 }

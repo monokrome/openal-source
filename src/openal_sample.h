@@ -48,22 +48,13 @@ public:
 	virtual bool InitFormat() { return true; };
 	virtual void DestroyFormat() {};
 
-	virtual void Open() {};
-	virtual void Close() {};
+	virtual void Open(const char* filename) { Init(); };
+	virtual void Close() { };
 
-	virtual bool CheckStream(ALuint buffer) = 0;
+	virtual bool CheckStream(ALuint buffer) { return true; };
 
 	virtual void UpdateMetadata() {};
-	void ClearMetadata();
-
-	/***
-	 * This is rarely ever used, but allows some interesting possibilities with very few
-	 * formats that might want real-time processing between Init and Destroy. A simple
-	 * example of something that might use this is a Sample that acts as a synthesizer
-	 * or groove generator instead of reading sample data from a sound file. Like I said,
-	 * rarely ever used but potentially disco.
-	 ***/
-	virtual void UpdateFormat(const float updateTime) {};
+	void ClearMetadata() { metadata->Clear(); };
 
 	CBaseEntity* m_pLinkedEntity; // Used for linking entities to this sample's source
 
