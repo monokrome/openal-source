@@ -8,6 +8,7 @@ Features:
 - Audio can be local to the player or positional
   - Uses for "local" audio include a media players, in-game radio, etc.
   - Positional audio can be used to add depth to an environment
+- Samples can be grouped together based on group names
 
 Coming:
 - Audio groups, so that we can arrange sources more nicely
