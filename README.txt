@@ -11,7 +11,6 @@ Features:
 - Samples can be grouped together based on group names
 
 Coming:
-- Audio groups, so that we can arrange sources more nicely
 - More in-game syncronization possibly including:
   - Under water audio distortion
   - Occlusion culling (if Source allows)
