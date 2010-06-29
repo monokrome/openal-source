@@ -1,4 +1,4 @@
-OpenAL-Source, Version 0.2.5
+OpenAL-Source, Version 0.3
 Embeds OpenAL into the Source Engine with a few other useful/related tools.
 
 Features:
@@ -16,7 +16,7 @@ Coming:
   - Occlusion culling (if Source allows)
   - Deafening effects
 - More advanced file loading facilities
-- Support for WAV, Flac, and possibly MP3
+- Support for WAV and possibly MP3/Flac
 - Entities allowing mappers to modify the state of the system
 - Relinking standard Source entities to use OpenAL instead of Miles
 
