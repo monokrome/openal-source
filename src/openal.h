@@ -93,6 +93,6 @@ public:
 	void OnExit();
 };
 
-extern COpenALGameSystem      g_OpenALGameSystem;
+extern COpenALGameSystem g_OpenALGameSystem;
 
 #endif
