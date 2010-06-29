@@ -3,6 +3,8 @@
 #include "c_basehlplayer.h" // For listener syncronization
 #include "openal_oggsample.h"
 
+#include "AL/efx.h"
+
 // This will tell OpenAL to start running the demo automatically.
 #define OPENAL_AUTOSTART_DEMO
 
@@ -19,6 +21,8 @@ COpenALGameSystem::COpenALGameSystem()
 
 	// Create a default sample group that contains rendered samples
 	m_AudioGroups.AddToTail(m_grpGlobal);
+
+
 }
 
 COpenALGameSystem::~COpenALGameSystem()

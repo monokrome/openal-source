@@ -82,7 +82,7 @@ private:
 class COpenALUpdateThread : public CWorkerThread
 {
 public:
-	enum { CALL_FUNC, EXIT, };
+	enum { CALL_FUNC, EXIT };
 
 	COpenALUpdateThread();
 	~COpenALUpdateThread();

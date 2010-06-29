@@ -56,8 +56,6 @@ public:
 	virtual void UpdateMetadata() {};
 	void ClearMetadata() { metadata->Clear(); };
 
-	CBaseEntity* m_pLinkedEntity; // Used for linking entities to this sample's source
-
 protected:
 	bool m_bStreaming; // Are we in streaming mode, or should we preload the data?
 	bool m_bFinished;  // Are we finished playing this sound? Can we delete this?
@@ -65,6 +63,8 @@ protected:
 	bool m_bReady;     // Are we ready to play this file?
 	bool m_bRequiresSync; // If this is true, we syncronize with the engine.
 	bool m_bPositional; // Are we placed in a world position?
+
+	CBaseEntity* m_pLinkedEntity; // Used for linking entities to this sample's source
 
 	float m_fPosition[3]; // Where is this sample source?
 	float m_fVelocity[3]; // In which velocity is our source playing?
@@ -76,7 +76,6 @@ protected:
 	ALuint buffers[NUM_BUFFERS];  // Buffers to queue our data into
 	ALuint source;                // Our source's identifier for OpenAL
 	ALenum format;                // A simple OpenAL-usable format description
-
 };
 
 #endif

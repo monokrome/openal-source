@@ -21,7 +21,7 @@ IOpenALSample::IOpenALSample()
 	m_fVelocity[1] = 0.0f;
 	m_fVelocity[2] = 0.0f;
 
-	metadata = new KeyValues("Metadata");
+	metadata = new KeyValues(NULL);
 }
 
 IOpenALSample::~IOpenALSample()
@@ -273,10 +273,10 @@ void IOpenALSample::SetPositional(bool positional=false)
 	{
 		m_bRequiresSync = true;
 		alSourcei(source, AL_SOURCE_RELATIVE, AL_FALSE);
-		alSourcef(source, AL_ROLLOFF_FACTOR, baseRolloffFactor);
+		alSourcef(source, AL_ROLLOFF_FACTOR, baseRolloffFactor*200);
 		if (alGetError() != AL_NO_ERROR)
 		{
-			Warning("OpenAL: Couldn't update rolloff factor to enable positional audio.");
+			Warning("OpenAL: Couldn't update rolloff factor to enable positional audio.\n");
 		}
 	}
 	else
@@ -285,7 +285,7 @@ void IOpenALSample::SetPositional(bool positional=false)
 		alSourcef(source, AL_ROLLOFF_FACTOR, 0.0f);
 		if (alGetError() != AL_NO_ERROR)
 		{
-			Warning("OpenAL: Couldn't update rolloff factor to disable positional audio.");
+			Warning("OpenAL: Couldn't update rolloff factor to disable positional audio.\n");
 		}
 	}
 
