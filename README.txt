@@ -19,6 +19,7 @@ Coming:
 - Support for WAV and possibly MP3/Flac
 - Entities allowing mappers to modify the state of the system
 - Relinking standard Source entities to use OpenAL instead of Miles
+- Optional fourier analysis system for beat detection and more
 
 All samples currently are not transient. They will not be removed on map change
 or if any other game-based event occurs, aside from quitting the game
