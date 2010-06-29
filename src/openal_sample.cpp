@@ -273,7 +273,7 @@ void IOpenALSample::SetPositional(bool positional=false)
 	{
 		m_bRequiresSync = true;
 		alSourcei(source, AL_SOURCE_RELATIVE, AL_FALSE);
-		alSourcef(source, AL_ROLLOFF_FACTOR, BASE_ROLLOFF_FACTOR);
+		alSourcef(source, AL_ROLLOFF_FACTOR, baseRolloffFactor);
 		if (alGetError() != AL_NO_ERROR)
 		{
 			Warning("OpenAL: Couldn't update rolloff factor to enable positional audio.");
