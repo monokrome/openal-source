@@ -44,7 +44,7 @@ bool COpenALGameSystem::Init()
 	ALhints[0] = ALC_MAX_AUXILIARY_SENDS;
 	ALhints[1] = requestedNumberOfAuxiliarySends;
 
-	m_alDevice = alcOpenDevice((ALCchar*) "Generic Hardware");
+	m_alDevice = alcOpenDevice(NULL);
 
 	if (m_alDevice == NULL)
 	{
