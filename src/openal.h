@@ -15,6 +15,8 @@ const float baseRolloffFactor = 1.0f;
 const float valveUnitsPerMeter = 1 / 0.01905;
 const float valveSpeedOfSound = METERS_TO_VALVEUNITS(340.29);
 
+const float requestedNumberOfAuxiliarySends = 4;
+
 #ifndef CLIENT_DLL
 #error You don't need OpenAL on the server. Only compile it for the client.
 #endif
@@ -37,6 +39,8 @@ typedef struct
 class COpenALGameSystem : public CAutoGameSystemPerFrame
 {
 public:
+	typedef enum { OPENAL_EFFECTS_EFX } openal_effects_type;
+
 	DECLARE_CLASS_GAMEROOT(COpenALGameSystem, CBaseGameSystemPerFrame);
 
 	COpenALGameSystem();
@@ -69,6 +73,9 @@ private:
 	ALCcontext *m_alContext;
 	ALCdevice  *m_alDevice;
 	bool m_bInitialized;
+	bool m_bEffectsAvailable; // Is effects processing available?
+	openal_effects_type m_effectsType;
+	ALCint m_iAuxiliarySendCount; // How many auxillary effect sends do we have?
 
 	CUtlVectorMT<CUtlVector<IOpenALSample*>> m_vSamples;
 	CUtlLinkedList<openal_groupdata_t*> m_AudioGroups;

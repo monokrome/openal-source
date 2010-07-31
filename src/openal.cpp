@@ -1,6 +1,6 @@
 #include "cbase.h"
 #include "openal.h"
-#include "c_basehlplayer.h" // For listener syncronization
+//#include "c_basehlplayer.h" // For listener syncronization
 #include "openal_oggsample.h"
 
 #include "AL/efx.h"
@@ -21,8 +21,6 @@ COpenALGameSystem::COpenALGameSystem()
 
 	// Create a default sample group that contains rendered samples
 	m_AudioGroups.AddToTail(m_grpGlobal);
-
-
 }
 
 COpenALGameSystem::~COpenALGameSystem()
@@ -40,14 +38,31 @@ bool COpenALGameSystem::Add(IOpenALSample *sample)
 
 bool COpenALGameSystem::Init()
 {
+	ALint ALhints[4];
 	float gain = 0.0f;
 
-	m_alDevice = alcOpenDevice((ALCchar*) "Generic Hardware");
+	ALhints[0] = ALC_MAX_AUXILIARY_SENDS;
+	ALhints[1] = requestedNumberOfAuxiliarySends;
+
+	m_alDevice = alcOpenDevice(NULL);
 
 	if (m_alDevice == NULL)
 	{
 		Warning("OpenAL: Device couldn't be properly opened. Initialization failed.\n");
 		return false;
+	}
+
+	/**
+	 * Check for effects extensions that we can use to provide digital signal processing
+	 */
+	if (alcIsExtensionPresent(m_alDevice, "ALC_EXT_EFX") == AL_FALSE)
+	{
+		m_bEffectsAvailable = false;
+	}
+	else
+	{
+		m_bEffectsAvailable = true;
+		m_effectsType = OPENAL_EFFECTS_EFX;
 	}
 
 	m_alContext = alcCreateContext(m_alDevice, NULL);
@@ -64,6 +79,10 @@ bool COpenALGameSystem::Init()
 		Warning("OpenAL: Couldn't make the OpenAL context current.\n");
 		return false;
 	}
+
+	// Figure out how many auxiliary sends we've got access to
+	if (m_bEffectsAvailable)
+		alcGetIntegerv(m_alDevice, ALC_MAX_AUXILIARY_SENDS, 1, &m_iAuxiliarySendCount);
 
 	// Initialize this to zero in order to prevent loud audio before we get the volume ConVar(s).
 	alListenerfv(AL_GAIN, &gain);
@@ -90,6 +109,16 @@ bool COpenALGameSystem::Init()
 #ifdef OPENAL_AUTOSTART_DEMO
 	engine->ClientCmd("openal_ogg_demo_play\n");
 #endif
+
+	DevMsg("OpenAL: Init finished ");
+
+	if (m_bEffectsAvailable)
+	{
+		DevMsg(" with %d auxiliary sends per source.", m_iAuxiliarySendCount);
+		alListenerf(AL_METERS_PER_UNIT, VALVEUNITS_TO_METERS(1));
+	}
+
+	DevMsg(".\nAL Renderer: %s\nAL Vendor: %s\nAL Version: %s\n", alGetString(AL_RENDERER), alGetString(AL_VENDOR), alGetString(AL_VERSION));
 
 	return true;
 }
