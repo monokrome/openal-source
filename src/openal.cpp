@@ -110,7 +110,7 @@ bool COpenALGameSystem::Init()
 	engine->ClientCmd("openal_ogg_demo_play\n");
 #endif
 
-	DevMsg("OpenAL: Init finished ");
+	DevMsg("OpenAL: Init finished");
 
 	if (m_bEffectsAvailable)
 	{
