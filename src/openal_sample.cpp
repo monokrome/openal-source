@@ -22,6 +22,8 @@ IOpenALSample::IOpenALSample()
 	m_fVelocity[2] = 0.0f;
 
 	metadata = new KeyValues(NULL);
+
+    m_pLinkedEntity = NULL;
 }
 
 IOpenALSample::~IOpenALSample()

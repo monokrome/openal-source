@@ -2,7 +2,8 @@
 #include "convar.h"
 #include "openal.h"
 #include "openal_oggsample.h"
-#include "c_basehlplayer.h"
+#include "openal_wavsample.h"
+//#include "c_basehlplayer.h"
 
 #define OGG_DEMO_FILENAME "demo/demo.ogg"
 #define POS_DEMO_FILENAME "demo/positional.ogg"
@@ -68,3 +69,35 @@ ConCommand openal_ogg_demo_play("openal_ogg_demo_play", OpenALOggDemoPlay, "Play
 ConCommand openal_ogg_demo_stop("openal_ogg_demo_stop", OpenALOggDemoStop, "Stop the demo of OpenAL's ogg playback.");
 ConCommand openal_positional_demo_play("openal_positional_demo_play", OpenALPositionalDemoPlay, "Play a demo of using OpenAL for positional audio.");
 ConCommand openal_positional_demo_stop("openal_positional_demo_stop", OpenALOggDemoStop, "Stop the demo of using OpenAL for positional audio.");
+
+#define WAV_SAMPLE "demo/wave_playback.wav"
+
+COpenALWavSample wavSample;
+
+void OpenALWavStart()
+{
+    if ( wavSample.IsReady() )
+    {
+        wavSample.Close();
+    }
+
+    wavSample.SetLooping(true);
+    wavSample.SetPositional(false);
+
+    wavSample.Open(WAV_SAMPLE);
+
+    if (wavSample.IsReady())
+        wavSample.Play();
+}
+
+void OpenALWavStop()
+{
+    if (wavSample.IsPlaying())
+    {
+        wavSample.Stop();
+        wavSample.Close();
+    }
+}
+
+ConCommand openal_wav_demo_play("openal_wav_demo_play", OpenALWavStart, "Play the demo of OpenAL's wav playback.");
+ConCommand openal_wav_demo_stop("openal_wav_demo_stop", OpenALWavStop, "Stop the demo of OpenAL's wav playback.");

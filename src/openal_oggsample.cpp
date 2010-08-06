@@ -60,6 +60,8 @@ void COpenALOggSample::Open(const char* filename)
 		format = AL_FORMAT_MONO16;
 	else
 		format = AL_FORMAT_STEREO16;
+    
+    m_bFinished = false; // Sample has just started, assume not finished
 
 	Init();
 }
