@@ -106,5 +106,8 @@ public:
 };
 
 extern COpenALGameSystem g_OpenALGameSystem;
+extern void PrintALError(ALenum error, const char *file, int line);
+
+#define ERROR_OUTPUT(error) PrintALError(error, __FILE__, __LINE__)
 
 #endif

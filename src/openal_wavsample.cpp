@@ -34,7 +34,11 @@ static unsigned long readByte32(const unsigned char buffer[4])
 
 COpenALWavSample::COpenALWavSample()
 {
-
+    m_iDataSize = 0;
+    m_iFrequency = 0;
+    m_iDataOffset = 0;
+    wavFile = FILESYSTEM_INVALID_HANDLE;
+    m_pszFileName = "";
 }
 
 COpenALWavSample::~COpenALWavSample()
@@ -44,12 +48,17 @@ COpenALWavSample::~COpenALWavSample()
 
 void COpenALWavSample::Open(const char* filename)
 {
+    // Todo:
+    // Make a more sturdy version of this?
+
     char path[MAX_PATH_LENGTH];
     char magic[5];
     magic[4] = '\0';
 
     unsigned char buffer32[4];
     unsigned char buffer16[2];
+
+    m_iDataOffset = 44;
 
     g_OpenALGameSystem.GetSoundPath(filename, path, sizeof(path) );
 
@@ -67,6 +76,8 @@ void COpenALWavSample::Open(const char* filename)
             return;
         }
     }
+
+    m_pszFileName = filename;
 
     // Magic check
     if ( !g_pFullFileSystem->Read(magic, 4, wavFile) )
@@ -195,6 +206,8 @@ void COpenALWavSample::Open(const char* filename)
             Warning("Unable to read wav file: %s\n", filename);
             return;
         }
+
+        m_iDataOffset += 12; // 8+4
     }
 
     if ( !FStrEq(magic, "data") )
@@ -205,7 +218,7 @@ void COpenALWavSample::Open(const char* filename)
 
     // If we want to know the size/length of the audio file, 
     // this piece of code will give you the size of the PCM data
-/*
+
     if ( !filesystem->Read( buffer32, 4, wavFile) ) 
     {
         Warning("Unable to read wav file: %s\n", filename);
@@ -213,7 +226,8 @@ void COpenALWavSample::Open(const char* filename)
     }
 
     unsigned long subChunk2Size = readByte32(buffer32);
-*/
+    m_iDataSize = subChunk2Size;
+
     m_bFinished = false;
 
     Init();
@@ -263,10 +277,16 @@ bool COpenALWavSample::CheckStream(ALuint buffer)
             return false;
         }
 
-        g_pFullFileSystem->Seek( wavFile, 0, FILESYSTEM_SEEK_HEAD );
-        
-        // Are we able to cheat past this one? 
-        return true;
+        // Seek to the beginning of the audio data, skipping the chunks before it
+        g_pFullFileSystem->Seek( wavFile, m_iDataSize, FILESYSTEM_SEEK_HEAD );
+
+        // Buffer the new stuff
+        result = g_pFullFileSystem->Read( data, BUFFER_SIZE, wavFile );
+
+        if (result > 0) // More data is waiting to be read
+        {
+            size += result;
+        }
     }
 
     BufferData(buffer, format, data, size, m_iFrequency);
