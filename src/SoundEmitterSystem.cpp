@@ -1,4 +1,4 @@
-//========= Copyright Â© 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
 //
 // Purpose: 
 //
@@ -197,11 +197,11 @@ public:
 
 	void FinishLog()
 	{
-        if ( FILESYSTEM_INVALID_HANDLE != m_hPrecacheLogFile )
-        {
-            filesystem->Close( m_hPrecacheLogFile );
-            m_hPrecacheLogFile = FILESYSTEM_INVALID_HANDLE;
-        }
+		if ( FILESYSTEM_INVALID_HANDLE != m_hPrecacheLogFile )
+		{
+			filesystem->Close( m_hPrecacheLogFile );
+			m_hPrecacheLogFile = FILESYSTEM_INVALID_HANDLE;
+		}
 
 		m_PrecachedScriptSounds.RemoveAll();
 	}
@@ -1001,9 +1001,28 @@ public:
         if ( !params.soundname[0] )
             return;
 
+        //if ( Q_stristr(params.soundname, ".ogg" ) )
         if ( !Q_stristr(params.soundname, ".mp3" ) )
         {
-            g_OpenALSamplePool.CreateNewSample( PSkipSoundChars( params.soundname ), ep );
+            /*
+            if (sample.IsPlaying())
+            {
+                sample.Stop();
+            }
+
+            if (sample.IsReady())
+                sample.Close();
+
+            sample.SetLooping(false);
+            sample.SetPositional(false);
+
+            sample.Open(params.soundname);
+
+            if (sample.IsReady())
+                sample.Play();
+                */
+
+            g_OpenALSamplePool.CreateNewSample( PSkipSoundChars( params.soundname ) );
         }
         else
         {
@@ -1024,9 +1043,31 @@ public:
     {
 #ifdef CLIENT_DLL
 
-        if ( Q_stristr(ep.m_pSoundName, ".ogg") || Q_stristr(ep.m_pSoundName, ".wav" ) )
+        CSoundParameters params;
+
+        // Try to deduce the actor's gender
+        gender_t gender = GENDER_NONE;
+        CBaseEntity *ent = CBaseEntity::Instance( entindex );
+        if ( ent )
         {
-            g_OpenALSamplePool.CreateNewSample( PSkipSoundChars( ep.m_pSoundName ), ep );
+            char const *actorModel = STRING( ent->GetModelName() );
+            gender = soundemitterbase->GetActorGender( actorModel );
+        }
+
+        if ( !soundemitterbase->GetParametersForSound( ep.m_pSoundName, params, gender, true ) )
+        {
+            if (!openal_allow_base.GetBool())
+            {
+                return;
+            }
+
+            g_SoundEmitterSystem_Base.EmitSound(filter, entindex, ep);
+            return;
+        }
+
+        if ( Q_stristr(params.soundname, ".ogg") || Q_stristr(params.soundname, ".wav" ) )
+        {
+            g_OpenALSamplePool.CreateNewSample( PSkipSoundChars( params.soundname ) );
         }
         else
         {
@@ -1040,6 +1081,46 @@ public:
 #else
             g_SoundEmitterSystem_Base.EmitSound(filter, entindex, ep);
 #endif
+        /*
+#ifdef CLIENT_DLL
+
+
+
+        
+        // Pull data from parameters
+        CSoundParameters params;
+
+        // Try to deduce the actor's gender
+        gender_t gender = GENDER_NONE;
+        CBaseEntity *ent = CBaseEntity::Instance( entindex );
+        if ( ent )
+        {
+            char const *actorModel = STRING( ent->GetModelName() );
+            gender = soundemitterbase->GetActorGender( actorModel );
+        }
+
+        if ( !soundemitterbase->GetParametersForSound( ep.m_pSoundName, params, gender, true ) )
+        {
+            return;
+        }
+
+        if ( !params.soundname[0] )
+            return;
+
+        //if ( Q_stristr(params.soundname, ".ogg" ) )
+        if ( !Q_stristr(params.soundname, ".mp3" ) )
+        {
+            g_OpenALSamplePool.CreateNewSample( PSkipSoundChars( params.soundname ) );
+        }
+        else
+        {
+            // Old-School system
+            g_SoundEmitterSystem_Base.EmitSound(filter, entindex, ep);
+        }
+#else
+        g_SoundEmitterSystem_Base.EmitSound(filter, entindex, ep);
+#endif
+        */
     }
 
     void EmitCloseCaption( IRecipientFilter& filter, int entindex, bool fromplayer, char const *token, CUtlVector< Vector >& originlist, float duration, bool warnifmissing /*= false*/ )
