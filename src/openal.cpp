@@ -413,3 +413,60 @@ int COpenALUpdateThread::Run()
 
 	return 0;
 }
+
+void PrintALError(ALenum error, const char *file, int line)
+{
+    switch(error)
+    {
+    case AL_NO_ERROR:
+        /*
+        Warning("OpenAL returned error:\n");
+        Msg("-File: %s (%i)\n"
+        "-Error Code: %s\n"
+        "--------------------------------------\n",
+        file, line, "AL_NO_ERROR" );
+        */
+        break;
+
+    case AL_INVALID_NAME:
+        Warning("OpenAL returned error:\n");
+        Msg("-File: %s (%i)\n"
+            "-Error Code: %s\n"
+            "--------------------------------------\n",
+            file, line, "AL_INVALID_NAME" );
+        break;
+
+    case AL_INVALID_ENUM:
+        Warning("OpenAL returned error:\n");
+        Msg("-File: %s (%i)\n"
+            "-Error Code: %s\n"
+            "--------------------------------------\n",
+            file, line, "AL_INVALID_ENUM" );
+        break;
+
+    case AL_INVALID_VALUE:
+        Warning("OpenAL returned error:\n");
+        Msg("-File: %s (%i)\n"
+            "-Error Code: %s\n"
+            "--------------------------------------\n",
+            file, line, "AL_INVALID_VALUE" );
+        break;
+
+    case AL_INVALID_OPERATION:
+        Warning("OpenAL returned error:\n");
+        Msg("-File: %s (%i)\n"
+            "-Error Code: %s\n"
+            "--------------------------------------\n",
+            file, line, "AL_INVALID_OPERATION" );
+        break;
+
+    case AL_OUT_OF_MEMORY:
+        Warning("CRITICAL!!!\n"); 
+        Warning("OpenAL returned error:\n");
+        Msg("-File: %s (%i)\n"
+            "-Error Code: %s\n"
+            "--------------------------------------\n",
+            file, line, "AL_OUT_OF_MEMORY" );
+        break;
+    };
+}

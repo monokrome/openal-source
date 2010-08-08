@@ -19,8 +19,11 @@ public:
     bool CheckStream(ALuint buffer);
 
 private:
+    const char *m_pszFileName;
     FileHandle_t wavFile;
     int m_iFrequency;
+    int m_iDataOffset; // Where in the file is the 
+    int m_iDataSize;
 };
 
 class COpenALWavLoaderExt : public IOpenALLoaderExt

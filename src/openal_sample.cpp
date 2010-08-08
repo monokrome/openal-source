@@ -65,15 +65,18 @@ void IOpenALSample::Destroy()
 	DestroyFormat();
 
 	alDeleteSources(1, &source);
-	if (alGetError() != AL_NO_ERROR)
+    ALenum error = alGetError();
+	if ( error != AL_NO_ERROR)
 	{
 		Warning("OpenAL: Error deleting a sound source. Destroying anyway.\n");
+        ERROR_OUTPUT(error);
 	}
 
 	alDeleteBuffers(NUM_BUFFERS, buffers);
-	if (alGetError() != AL_NO_ERROR)
-	{
+    if ( error != AL_NO_ERROR)
+    {
 		Warning("OpenAL: Error deleting buffers. Destroying anyway.\n");
+        ERROR_OUTPUT(error);
 	}
 }
 
@@ -112,11 +115,14 @@ inline void IOpenALSample::UpdateBuffers(const float updateTime)
 	while (processed--)
 	{
 		ALuint buffer;
+        ALenum error;
 
 		alSourceUnqueueBuffers(source, 1, &buffer);
-		if (alGetError() != AL_NO_ERROR)
+        error = alGetError();
+		if (error != AL_NO_ERROR)
 		{
 			Warning("OpenAL: There was an error unqueuing a buffer. Issues may arise.\n");
+            ERROR_OUTPUT(error);
 		}
 
 		active = CheckStream(buffer);
@@ -125,9 +131,11 @@ inline void IOpenALSample::UpdateBuffers(const float updateTime)
 		if (active)
 		{
 			alSourceQueueBuffers(source, 1, &buffer);
-			if (alGetError() != AL_NO_ERROR)
-			{
+            error = alGetError();
+            if (error != AL_NO_ERROR)
+            {
 				Warning("OpenAL: There was an error queueing a buffer. Expect some turbulence.\n");
+                ERROR_OUTPUT(error);
 			}
 
 			if (state != AL_PLAYING && state != AL_PAUSED)
@@ -159,12 +167,14 @@ void IOpenALSample::Play()
 	if (alGetError() != AL_NO_ERROR)
 	{
 		Warning("OpenAL: There was an error queueing buffers. This will probably fix itself, but it's still not ideal.\n");
+        ERROR_OUTPUT(alGetError());
 	}
 
 	alSourcePlay(source);
 	if (alGetError() != AL_NO_ERROR)
 	{
 		Warning("OpenAL: Playing an audio sample failed horribly.\n");
+        ERROR_OUTPUT(alGetError());
 	}
 }
 
@@ -177,6 +187,7 @@ void IOpenALSample::Stop()
 	if (alGetError() != AL_NO_ERROR)
 	{
 		Warning("OpenAL: Error stopping a sound. This is less than good news.\n");
+        ERROR_OUTPUT(alGetError());
 	}
 
 	ClearBuffers();
@@ -246,7 +257,10 @@ void IOpenALSample::ClearBuffers()
 	alSourcei(source, AL_BUFFER, 0);
 
 	if (alGetError() != AL_NO_ERROR)
+    {
 		Warning("OpenAL: An error occured while attempting to clear a source's buffers.\n");
+        ERROR_OUTPUT(alGetError());
+    }
 }
 
 /***
@@ -258,6 +272,7 @@ void IOpenALSample::BufferData(ALuint bufferID, ALenum format, const ALvoid* dat
 	if (alGetError() != AL_NO_ERROR)
 	{
 		Warning("OpenAL: There was an error buffering audio data. Releasing deadly neurotoxin in 3... 2.. 1..\n");
+        ERROR_OUTPUT(alGetError());
 	}
 }
 
@@ -279,6 +294,7 @@ void IOpenALSample::SetPositional(bool positional=false)
 		if (alGetError() != AL_NO_ERROR)
 		{
 			Warning("OpenAL: Couldn't update rolloff factor to enable positional audio.\n");
+            ERROR_OUTPUT(alGetError());
 		}
 	}
 	else
@@ -288,6 +304,7 @@ void IOpenALSample::SetPositional(bool positional=false)
 		if (alGetError() != AL_NO_ERROR)
 		{
 			Warning("OpenAL: Couldn't update rolloff factor to disable positional audio.\n");
+            ERROR_OUTPUT(alGetError());
 		}
 	}
 
