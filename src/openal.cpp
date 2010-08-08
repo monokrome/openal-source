@@ -2,6 +2,7 @@
 #include "openal.h"
 //#include "c_basehlplayer.h" // For listener syncronization
 #include "openal_oggsample.h"
+#include "openal_sample_pool.h"
 
 #include "AL/efx.h"
 
@@ -26,11 +27,15 @@ COpenALGameSystem::~COpenALGameSystem()
 
 bool COpenALGameSystem::Add(IOpenALSample *sample)
 {
+    // Todo: Remove this
+    return true;
+/*
 	AUTO_LOCK_FM(m_vSamples);
 	m_vSamples.AddToTail(sample);
 	m_grpGlobal->samples.AddToTail(sample);
 
 	return true;
+*/
 }
 
 bool COpenALGameSystem::Init()
@@ -130,14 +135,17 @@ void COpenALGameSystem::Shutdown()
 	if (g_OpenALUpdateThread.IsAlive())
 		g_OpenALUpdateThread.CallWorker(COpenALUpdateThread::EXIT);
 
+    g_OpenALSamplePool.Shutdown();
+    /*
 	AUTO_LOCK_FM(m_vSamples);
 	for (int i=0; i < m_vSamples.Count(); i++)
 	{
 		delete m_vSamples[i];
 	}
+    
 
 	m_vSamples.RemoveAll();
-
+    */
 	if (m_alDevice != NULL)
 	{
 		if (m_alContext != NULL)
@@ -396,7 +404,11 @@ int COpenALUpdateThread::Run()
 		}
 
 		// Otherwise, let's keep those speakers pumpin'
-		g_OpenALGameSystem.UpdateSamples(gpGlobals->curtime);
+
+        // This functionality is being moved to the sample pool for perf/stability
+		// g_OpenALGameSystem.UpdateSamples(gpGlobals->curtime);
+
+        g_OpenALSamplePool.Update();
 	}
 
 	return 0;
