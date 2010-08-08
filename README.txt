@@ -3,7 +3,7 @@ Embeds OpenAL into the Source Engine with a few other useful/related tools.
 
 Features:
 - Audio moves at the speed of sound and respects the doppler effect
-- OggVorbis Playback
+- OggVorbis & WAV Playback
 - Links audio sources to entities so that they are consistently in sync
 - Audio can be local to the player or positional
   - Uses for "local" audio include a media players, in-game radio, etc.
@@ -16,7 +16,6 @@ Coming:
   - Occlusion culling (if Source allows)
   - Deafening effects
 - More advanced file loading facilities
-- Support for WAV and possibly MP3/Flac
 - Entities allowing mappers to modify the state of the system
 - Relinking standard Source entities to use OpenAL instead of Miles
 - Optional fourier analysis system for beat detection and more
