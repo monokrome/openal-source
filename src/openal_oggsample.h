@@ -7,6 +7,7 @@
 #include "vorbis/codec.h"
 #include "vorbis/vorbisenc.h"
 #include "vorbis/vorbisfile.h"
+#include "openal_loader.h"
 
 #define MAX_PATH_LENGTH 1024
 
@@ -27,6 +28,15 @@ private:
 	OggVorbis_File oggSample;
 	vorbis_info* vorbisInfo;
 	vorbis_comment* vorbisComment;
+};
+
+class COpenALOggLoaderExt : public IOpenALLoaderExt
+{
+public:
+	COpenALOggLoaderExt();
+	~COpenALOggLoaderExt();
+
+	virtual IOpenALSample* Get();
 };
 
 #endif

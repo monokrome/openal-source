@@ -10,6 +10,9 @@ int vorbis_close_func(void *datasource);
 int vorbis_seek_func(void *datasource, ogg_int64_t offset, int whence);
 long vorbis_tell_func(void *datasource);
 
+// Instantiates our loader.
+COpenALOggLoaderExt oggLoader;
+
 COpenALOggSample::COpenALOggSample()
 {
 }
@@ -204,4 +207,19 @@ void COpenALOggSample::UpdateMetadata()
 		free(thisKey);
 		free(thisValue);
 	}
+}
+
+COpenALOggLoaderExt::COpenALOggLoaderExt()
+{
+	g_OpenALLoader.Register(this, "ogg");
+}
+
+COpenALOggLoaderExt::~COpenALOggLoaderExt()
+{
+	g_OpenALLoader.Deregister(this, "ogg");
+}
+
+IOpenALSample* COpenALOggLoaderExt::Get()
+{
+	return new COpenALOggSample();
 }
