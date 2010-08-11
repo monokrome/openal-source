@@ -13,6 +13,7 @@
 #include "cbase.h"
 #include "openal.h"
 #include "openal_wavsample.h"
+#include "openal_loader.h"
 
 #include "memdbgon.h"
 
@@ -246,4 +247,21 @@ bool COpenALWavSample::CheckStream(ALuint buffer)
     BufferData(buffer, format, data, size, m_iFrequency);
 
     return true;
+}
+
+bool COpenALWavLoaderExt::Init()
+{
+	g_OpenALLoader.Register(this, "ogg");
+	
+	return true;
+}
+
+COpenALWavLoaderExt::~COpenALWavLoaderExt()
+{
+	g_OpenALLoader.Deregister(this, "ogg");
+}
+
+IOpenALSample* COpenALWavLoaderExt::Get()
+{
+	return new COpenALWavSample();
 }
