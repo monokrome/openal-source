@@ -5,9 +5,6 @@
 
 #include "AL/efx.h"
 
-// This will tell OpenAL to start running the demo automatically.
-#define OPENAL_AUTOSTART_DEMO
-
 COpenALUpdateThread    g_OpenALUpdateThread;
 COpenALGameSystem      g_OpenALGameSystem;
 
@@ -106,10 +103,6 @@ bool COpenALGameSystem::Init()
 	if (!g_OpenALUpdateThread.IsAlive())
 		g_OpenALUpdateThread.Start();
 
-#ifdef OPENAL_AUTOSTART_DEMO
-	engine->ClientCmd("openal_ogg_demo_play\n");
-#endif
-
 	DevMsg("OpenAL: Init finished");
 
 	if (m_bEffectsAvailable)
@@ -122,6 +115,15 @@ bool COpenALGameSystem::Init()
 
 	return true;
 }
+
+#ifdef OPENAL_AUTOSTART_DEMO
+
+void COpenALGameSystem::PostInit()
+{
+	engine->ClientCmd("openal_ogg_demo_play\n");
+}
+
+#endif
 
 void COpenALGameSystem::Shutdown()
 {
