@@ -141,23 +141,88 @@ void CSamplePool::Stop( SampleHandle_t handle )
     }
 }
 
-void CSamplePool::Update()
+void CSamplePool::PreFrame()
 {
     AUTO_LOCK_FM(m_SamplePool);
 
     if (!m_SamplePool.Count())
     {
-        // We like optimizations
         return;
     }
-    
+
     int i = 0;
-    
-    while ( i < m_SamplePool.Count() )
+
+    while ( true )
     {
         if (!m_SamplePool.IsValidIndex(i))
         {
-            // This blows...
+            break;
+        }
+
+        SampleData_t data = m_SamplePool[i];
+
+        // Is the sample invalid?
+        if ( data.sample == NULL )
+        {
+            IOpenALSample *pSample = data.sample;
+
+            pSample->Destroy();
+            delete pSample;
+
+            pSample = NULL;
+
+            m_SamplePool.Remove(i);
+
+            i += 1;
+            continue;
+        }
+
+        if (data.codec == CODEC_NONE)
+        {
+            IOpenALSample *pSample = data.sample;
+
+            pSample->Destroy();
+            delete pSample;
+
+            pSample = NULL;
+
+            m_SamplePool.Remove(i);
+
+            i += 1;
+            continue;
+        } 
+
+        if ( data.sample->IsFinished() && !data.sample->IsPlaying() )
+        {
+            IOpenALSample *pSample = data.sample;
+
+            pSample->Destroy();
+            delete pSample;
+
+            pSample = NULL;
+
+            m_SamplePool.Remove(i);
+        }
+
+        i += 1;
+    }
+}
+
+void CSamplePool::Frame()
+{
+    AUTO_LOCK_FM(m_SamplePool);
+
+    if (!m_SamplePool.Count())
+    {
+        return;
+    }
+
+    int i = 0;
+
+    while ( true )
+    {
+        if (!m_SamplePool.IsValidIndex(i))
+        {
             break;
         }
 
@@ -190,21 +255,19 @@ void CSamplePool::Update()
                 data.sample->Stop();
             }
         }
-
-        if ( data.sample->IsFinished() )
-        {
-            IOpenALSample *pSample = data.sample;
-
-            pSample->Destroy();
-            delete pSample;
-
-            pSample = NULL;
-
-            m_SamplePool.Remove(i);
-        }
-        else
-            i += 1;
+        
+        i += 1;
     }
+
+}
+
+void CSamplePool::PostFrame()
+{
+
+}
+
+void CSamplePool::Update()
+{
 }
 
 void CSamplePool::Shutdown()

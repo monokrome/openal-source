@@ -1043,31 +1043,9 @@ public:
     {
 #ifdef CLIENT_DLL
 
-        CSoundParameters params;
-
-        // Try to deduce the actor's gender
-        gender_t gender = GENDER_NONE;
-        CBaseEntity *ent = CBaseEntity::Instance( entindex );
-        if ( ent )
+        if ( Q_stristr(ep.m_pSoundName, ".ogg") || Q_stristr(ep.m_pSoundName, ".wav" ) )
         {
-            char const *actorModel = STRING( ent->GetModelName() );
-            gender = soundemitterbase->GetActorGender( actorModel );
-        }
-
-        if ( !soundemitterbase->GetParametersForSound( ep.m_pSoundName, params, gender, true ) )
-        {
-            if (!openal_allow_base.GetBool())
-            {
-                return;
-            }
-
-            g_SoundEmitterSystem_Base.EmitSound(filter, entindex, ep);
-            return;
-        }
-
-        if ( Q_stristr(params.soundname, ".ogg") || Q_stristr(params.soundname, ".wav" ) )
-        {
-            g_OpenALSamplePool.CreateNewSample( PSkipSoundChars( params.soundname ) );
+            g_OpenALSamplePool.CreateNewSample( PSkipSoundChars( ep.m_pSoundName ) );
         }
         else
         {

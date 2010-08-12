@@ -11,7 +11,6 @@
 #define POS_DEMO_FILENAME "demo/positional.ogg"
 
 IOpenALSample* demoSample;
-SampleHandle_t oggHandle;
 
 /***
  * Stops all demos that rely on the demoSample pointer.
@@ -44,9 +43,6 @@ void OpenALPlayDemo(void)
 
 	if (demoSample->IsReady())
 		demoSample->Play();
-    */
-
-    oggHandle = g_OpenALSamplePool.CreateNewSample(OGG_DEMO_FILENAME);
 }
 
 /***
@@ -95,7 +91,6 @@ ConCommand openal_stop_demo("openal_stop_demo", OpenALStopDemo, "Stop the curren
 #define WAV_SAMPLE "demo/wave_playback.wav"
 
 COpenALWavSample wavSample;
-SampleHandle_t wavHandle;
 
 void OpenALWavStart()
 {
@@ -113,8 +108,6 @@ void OpenALWavStart()
     if (wavSample.IsReady())
         wavSample.Play();
     */
-
-    wavHandle = g_OpenALSamplePool.CreateNewSample(WAV_SAMPLE);
 }
 
 void OpenALWavStop()
@@ -126,7 +119,6 @@ void OpenALWavStop()
         wavSample.Close();
     }
     */
-    g_OpenALSamplePool.Stop(wavHandle);
 }
 
 ConCommand openal_wav_demo_play("openal_wav_demo_play", OpenALWavStart, "Play the demo of OpenAL's wav playback.");

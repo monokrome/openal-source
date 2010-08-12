@@ -53,6 +53,10 @@ public:
 
     void Update();
 
+    void PreFrame();
+    void Frame();
+    void PostFrame();
+
     inline bool ShouldHandleThisSound(const char *filename); // Use to check if this sound should be sent througn OpenAL or not
         
     // We'll have to update this func when more data is required to pass

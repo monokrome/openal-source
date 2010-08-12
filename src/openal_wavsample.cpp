@@ -17,7 +17,6 @@
 
 #include "memdbgon.h"
 
-
 // Utility functions for format verification
 static unsigned short readByte16(const unsigned char buffer[2]) 
 {
@@ -38,7 +37,6 @@ COpenALWavSample::COpenALWavSample()
     m_iFrequency = 0;
     m_iDataOffset = 0;
     wavFile = FILESYSTEM_INVALID_HANDLE;
-    m_pszFileName = "";
 }
 
 COpenALWavSample::~COpenALWavSample()
@@ -62,13 +60,13 @@ void COpenALWavSample::Open(const char* filename)
 
     g_OpenALGameSystem.GetSoundPath(filename, path, sizeof(path) );
 
-    wavFile = g_pFullFileSystem->Open(path, "rb");
+    wavFile = filesystem->Open(path, "rb");
 
     if (wavFile == FILESYSTEM_INVALID_HANDLE)
     {
         Q_snprintf(path, sizeof(path), "sound/%s", filename);
 
-        wavFile = g_pFullFileSystem->Open(path, "rb");
+        wavFile = filesystem->Open(path, "rb");
 
         if (wavFile == FILESYSTEM_INVALID_HANDLE)
         {
@@ -77,10 +75,10 @@ void COpenALWavSample::Open(const char* filename)
         }
     }
 
-    m_pszFileName = filename;
+    Q_strncpy(m_pszFileName, path, sizeof(m_pszFileName) );
 
     // Magic check
-    if ( !g_pFullFileSystem->Read(magic, 4, wavFile) )
+    if ( !filesystem->Read(magic, 4, wavFile) )
     {
         Warning("Unable to read wav file: %s \n", filename);
         return;
@@ -93,10 +91,10 @@ void COpenALWavSample::Open(const char* filename)
     }
 
     // Skip file size
-    g_pFullFileSystem->Seek(wavFile, 4, FILESYSTEM_SEEK_CURRENT);
+    filesystem->Seek(wavFile, 4, FILESYSTEM_SEEK_CURRENT);
 
     // WAVE check
-    if ( !g_pFullFileSystem->Read(magic, 4, wavFile) )
+    if ( !filesystem->Read(magic, 4, wavFile) )
     {
         Warning("Unable to read wav file: %s\n", filename);
         return;
@@ -109,7 +107,7 @@ void COpenALWavSample::Open(const char* filename)
     }
 
     // fmt check
-    if ( !g_pFullFileSystem->Read(magic, 4, wavFile) )
+    if ( !filesystem->Read(magic, 4, wavFile) )
     {
         Warning("Unable to read wav file: %s\n", filename);
         return;
@@ -122,7 +120,7 @@ void COpenALWavSample::Open(const char* filename)
     }
 
     // Check size of (1)
-    if ( !g_pFullFileSystem->Read(buffer32, 4, wavFile) )
+    if ( !filesystem->Read(buffer32, 4, wavFile) )
     {
         Warning("Unable to read wav file: %s\n", filename);
         return;
@@ -136,7 +134,7 @@ void COpenALWavSample::Open(const char* filename)
     }
 
     // Check PCM format
-    if ( !g_pFullFileSystem->Read(buffer16, 2, wavFile) )
+    if ( !filesystem->Read(buffer16, 2, wavFile) )
     {
         Warning("Unable to read wav file: %s\n", filename);
         return;
@@ -151,7 +149,7 @@ void COpenALWavSample::Open(const char* filename)
     }
 
     // read channels
-    if ( !g_pFullFileSystem->Read( buffer16, 2, wavFile) ) 
+    if ( !filesystem->Read( buffer16, 2, wavFile) ) 
     {
         Warning("Unable to read wav file: %s\n", filename);
         return;
@@ -160,7 +158,7 @@ void COpenALWavSample::Open(const char* filename)
     unsigned short channels = readByte16(buffer16);
 
     // read frequency
-    if ( !g_pFullFileSystem->Read(buffer32, 4, wavFile) )
+    if ( !filesystem->Read(buffer32, 4, wavFile) )
     {
         Warning("Unable to read wav file: %s\n", filename);
         return;
@@ -169,10 +167,10 @@ void COpenALWavSample::Open(const char* filename)
     unsigned long frequency = readByte32(buffer32);
     m_iFrequency = frequency;
 
-    g_pFullFileSystem->Seek( wavFile, 6, FILESYSTEM_SEEK_CURRENT);
+    filesystem->Seek( wavFile, 6, FILESYSTEM_SEEK_CURRENT);
 
     // read bps
-    if ( !g_pFullFileSystem->Read( buffer16, 2, wavFile) ) 
+    if ( !filesystem->Read( buffer16, 2, wavFile) ) 
     {
         Warning("Unable to read wav file: %s\n", filename);
         return;
@@ -190,7 +188,7 @@ void COpenALWavSample::Open(const char* filename)
     }
     
     // read data sub-chunk
-    if ( !g_pFullFileSystem->Read( magic, 4, wavFile) ) 
+    if ( !filesystem->Read( magic, 4, wavFile) ) 
     {
         Warning("Unable to read wav file: %s\n", filename);
         return;
@@ -199,9 +197,9 @@ void COpenALWavSample::Open(const char* filename)
     if ( FStrEq(magic, "fact" ) )
     {
         // Skip fact chunk if present
-        g_pFullFileSystem->Seek(wavFile, 8, FILESYSTEM_SEEK_CURRENT);
+        filesystem->Seek(wavFile, 8, FILESYSTEM_SEEK_CURRENT);
 
-        if ( !g_pFullFileSystem->Read( magic, 4, wavFile) ) 
+        if ( !filesystem->Read( magic, 4, wavFile) ) 
         {
             Warning("Unable to read wav file: %s\n", filename);
             return;
@@ -215,9 +213,6 @@ void COpenALWavSample::Open(const char* filename)
         Warning("Invalid file format in wave file %s (no data sub-chunk)\n", filename);
         return;
     }
-
-    // If we want to know the size/length of the audio file, 
-    // this piece of code will give you the size of the PCM data
 
     if ( !filesystem->Read( buffer32, 4, wavFile) ) 
     {
@@ -235,7 +230,7 @@ void COpenALWavSample::Open(const char* filename)
 
 void COpenALWavSample::Close()
 {
-    g_pFullFileSystem->Close(wavFile);
+    filesystem->Close(wavFile);
     m_bReady = false;
     ClearBuffers();
 }
@@ -244,12 +239,12 @@ bool COpenALWavSample::CheckStream(ALuint buffer)
 {
     if (!IsReady()) return false;
 
-    char data[BUFFER_SIZE];
+    char data[OPENAL_BUFFER_SIZE];
     int result, size=0;
 
-    while ( size < BUFFER_SIZE )
+    while ( size < OPENAL_BUFFER_SIZE )
     {
-        result = g_pFullFileSystem->Read( data, BUFFER_SIZE, wavFile );
+        result = filesystem->Read( data, OPENAL_BUFFER_SIZE, wavFile );
 
         if (result > 0) // More data is waiting to be read
         {
@@ -278,10 +273,10 @@ bool COpenALWavSample::CheckStream(ALuint buffer)
         }
 
         // Seek to the beginning of the audio data, skipping the chunks before it
-        g_pFullFileSystem->Seek( wavFile, m_iDataSize, FILESYSTEM_SEEK_HEAD );
+        filesystem->Seek( wavFile, m_iDataSize, FILESYSTEM_SEEK_HEAD );
 
         // Buffer the new stuff
-        result = g_pFullFileSystem->Read( data, BUFFER_SIZE, wavFile );
+        result = filesystem->Read( data, OPENAL_BUFFER_SIZE, wavFile );
 
         if (result > 0) // More data is waiting to be read
         {
