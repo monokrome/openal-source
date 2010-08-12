@@ -5,7 +5,7 @@
 #include "KeyValues.h"
 
 #define NUM_BUFFERS 4
-#define BUFFER_SIZE 65536 // 65536 bytes = 64KB
+#define OPENAL_BUFFER_SIZE 65536 // 65536 bytes = 64KB
 
 class IOpenALSample
 {

@@ -28,22 +28,27 @@ IOpenALSample::IOpenALSample()
 
 IOpenALSample::~IOpenALSample()
 {
-	Destroy(); // It never hurts to verify!
+	//Destroy(); // It never hurts to verify!
 }
 
 void IOpenALSample::Init()
 {
 	alGenBuffers(NUM_BUFFERS, buffers);
-	if (alGetError() != AL_NO_ERROR)
+    ALenum error = alGetError();
+	if (error != AL_NO_ERROR)
 	{
 		Warning("OpenAL: Error generating a saomple's buffers. Sample will not play.\n");
+        ERROR_OUTPUT(error);
 		return;
 	}
 
 	alGenSources(1, &source);
-	if (alGetError() != AL_NO_ERROR)
+    error = alGetError();
+
+	if (error != AL_NO_ERROR)
 	{
 		Warning("OpenAL: Error generating a sample's source. Sample will not play.\n");
+        ERROR_OUTPUT(error);
 		return;
 	}
 
@@ -147,35 +152,41 @@ inline void IOpenALSample::UpdateBuffers(const float updateTime)
 }
 
 /***
- * Generic playback controls
- ***/
+* Generic playback controls
+***/
 void IOpenALSample::Play()
 {
-	if (IsPlaying())
-		return; // Well, that was easy!
+    int buffersToQueue = 0;
 
-	for (int i=0; i < NUM_BUFFERS; ++i)
-	{
-		if (!CheckStream(buffers[i]))
-		{
-			Warning("OpenAL: Couldn't play a stream. A buffer wasn't a valid audio stream.\n");
-			return;
-		}
-	}
+    if (IsPlaying())
+        return; // Well, that was easy!
 
-	alSourceQueueBuffers(source, NUM_BUFFERS, buffers);
-	if (alGetError() != AL_NO_ERROR)
-	{
-		Warning("OpenAL: There was an error queueing buffers. This will probably fix itself, but it's still not ideal.\n");
-        ERROR_OUTPUT(alGetError());
-	}
+    for (int i=0; i < NUM_BUFFERS; ++i)
+    {
+        if (CheckStream(buffers[i]))
+        {
+            ++buffersToQueue;
+        }
+    }
 
-	alSourcePlay(source);
-	if (alGetError() != AL_NO_ERROR)
-	{
-		Warning("OpenAL: Playing an audio sample failed horribly.\n");
-        ERROR_OUTPUT(alGetError());
-	}
+    if (buffersToQueue == 0)
+    {
+        Warning("OpenAL: Couldn't play a stream.\n");
+        return;
+    }
+
+    alSourceQueueBuffers(source, buffersToQueue, buffers);
+    if (alGetError() != AL_NO_ERROR)
+    {
+        Warning("OpenAL: There was an error queueing buffers. This will probably fix itself, but it's still not ideal.\n");
+    }
+
+    alSourcePlay(source);
+
+    if (alGetError() != AL_NO_ERROR)
+    {
+        Warning("OpenAL: Playing an audio sample failed horribly.\n");
+    }
 }
 
 void IOpenALSample::Stop()

@@ -405,10 +405,16 @@ int COpenALUpdateThread::Run()
 
 		// Otherwise, let's keep those speakers pumpin'
 
-        // This functionality is being moved to the sample pool for perf/stability
-		// g_OpenALGameSystem.UpdateSamples(gpGlobals->curtime);
+        // Do PreFrames
+        g_OpenALSamplePool.PreFrame();
 
-        g_OpenALSamplePool.Update();
+        // Do Frames
+        g_OpenALSamplePool.Frame();
+
+        // Do PostFrames
+        g_OpenALSamplePool.PostFrame();
+
+        //g_OpenALSamplePool.Update();
 	}
 
 	return 0;
@@ -468,5 +474,11 @@ void PrintALError(ALenum error, const char *file, int line)
             "--------------------------------------\n",
             file, line, "AL_OUT_OF_MEMORY" );
         break;
+    default:
+        Warning("OpenAL returned error:\n");
+        Msg("-File: %s (%i)\n"
+            "-Unknown error code: %i\n"
+            "--------------------------------------\n",
+            file, line, error);
     };
 }

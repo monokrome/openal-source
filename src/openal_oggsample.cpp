@@ -80,12 +80,12 @@ bool COpenALOggSample::CheckStream(ALuint buffer)
 {
 	if (!IsReady()) return false;
 
-	char data[BUFFER_SIZE];
+	char data[OPENAL_BUFFER_SIZE];
 	int result, section=0, size=0;
 
-	while (size < BUFFER_SIZE)
+	while (size < OPENAL_BUFFER_SIZE)
 	{
-		result = ov_read(&oggSample, data+size, BUFFER_SIZE-size, 0, 2, 1, &section);
+		result = ov_read(&oggSample, data+size, OPENAL_BUFFER_SIZE-size, 0, 2, 1, &section);
 
 		if (result > 0) // More data is waiting to be read
 		{

@@ -19,7 +19,7 @@ public:
     bool CheckStream(ALuint buffer);
 
 private:
-    const char *m_pszFileName;
+    char m_pszFileName[MAX_PATH_LENGTH];
     FileHandle_t wavFile;
     int m_iFrequency;
     int m_iDataOffset; // Where in the file is the 
