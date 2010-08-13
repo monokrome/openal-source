@@ -39,6 +39,8 @@ public:
 	void SetVelocity(const float orientation[3]);
 	void SetVelocity(const Vector velocity);
 
+    void SetGain(float newGain) { m_fGain = newGain; }
+
 	void SetLooping(bool shouldLoop);
 	void ClearBuffers();
 
@@ -50,6 +52,11 @@ public:
 
 	virtual void Open(const char* filename) { Init(); };
 	virtual void Close() { };
+
+    // This is the update function for subclasses
+    // The reason we do it like this is to prevent subclasses from interfering 
+    // with vital processes that all samples share
+    virtual void SubUpdate() {}; 
 
 	virtual bool CheckStream(ALuint buffer) { return true; };
 

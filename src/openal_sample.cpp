@@ -106,6 +106,8 @@ void IOpenALSample::Update(const float updateTime)
 	UpdatePositional(updateTime);
 	UpdateBuffers(updateTime);
 
+    SubUpdate();
+
 	m_bRequiresSync = false;
 }
 
@@ -249,7 +251,12 @@ bool IOpenALSample::IsPlaying()
 {
 	ALenum state;
 	alGetSourcei(source, AL_SOURCE_STATE, &state);
-	alGetError(); // Spy's sappin' mah error buffer!
+
+    ALenum error = alGetError();
+    if (error != AL_NO_ERROR)
+    {
+        ERROR_OUTPUT(error); // Spy's sappin' mah error buffer!
+    }
 
 	return (state == AL_PLAYING);
 }
@@ -292,8 +299,14 @@ void IOpenALSample::BufferData(ALuint bufferID, ALenum format, const ALvoid* dat
  ***/
 void IOpenALSample::SetPositional(bool positional=false)
 {
-	// We don't need to set positional if we've already done so!
-	if (positional == m_bPositional) return;
+    int already_positional = 0;
+    alGetSourcei(source, AL_SOURCE_RELATIVE, &already_positional);
+
+    // We don't need to set positional if we've already done so!
+    if (already_positional)
+    {
+        return;
+    }
 
 	m_bPositional = positional;
 	
@@ -302,20 +315,24 @@ void IOpenALSample::SetPositional(bool positional=false)
 		m_bRequiresSync = true;
 		alSourcei(source, AL_SOURCE_RELATIVE, AL_FALSE);
 		alSourcef(source, AL_ROLLOFF_FACTOR, baseRolloffFactor*200);
-		if (alGetError() != AL_NO_ERROR)
-		{
+        
+        ALenum error = alGetError();
+        if (error != AL_NO_ERROR)
+        {
 			Warning("OpenAL: Couldn't update rolloff factor to enable positional audio.\n");
-            ERROR_OUTPUT(alGetError());
+            ERROR_OUTPUT(error);
 		}
 	}
 	else
 	{
 		alSourcei(source, AL_SOURCE_RELATIVE, AL_TRUE);
 		alSourcef(source, AL_ROLLOFF_FACTOR, 0.0f);
-		if (alGetError() != AL_NO_ERROR)
+
+        ALenum error = alGetError();
+		if (error != AL_NO_ERROR)
 		{
 			Warning("OpenAL: Couldn't update rolloff factor to disable positional audio.\n");
-            ERROR_OUTPUT(alGetError());
+            ERROR_OUTPUT(error);
 		}
 	}
 
@@ -329,16 +346,26 @@ inline void IOpenALSample::UpdatePositional(const float lastUpdate)
 	float position[3];
 	float velocity[3];
 
-	if (m_pLinkedEntity)
+	if (m_pLinkedEntity )
 	{
-			// TODO: Provide methods for better control of this position
-			position[0] = m_pLinkedEntity->GetAbsOrigin().x;
-			position[1] = m_pLinkedEntity->GetAbsOrigin().y;
-			position[2] = m_pLinkedEntity->GetAbsOrigin().y;
+        /*
+		// TODO: Provide methods for better control of this position
+		position[0] = m_pLinkedEntity->GetAbsOrigin().x;
+		position[1] = m_pLinkedEntity->GetAbsOrigin().y;
+		position[2] = m_pLinkedEntity->GetAbsOrigin().y;
 
-			velocity[0] = m_pLinkedEntity->GetAbsVelocity().x;
-			velocity[1] = m_pLinkedEntity->GetAbsVelocity().y;
-			velocity[2] = m_pLinkedEntity->GetAbsVelocity().z;
+		velocity[0] = m_pLinkedEntity->GetAbsVelocity().x;
+		velocity[1] = m_pLinkedEntity->GetAbsVelocity().y;
+		velocity[2] = m_pLinkedEntity->GetAbsVelocity().z;
+        */
+        
+        position[0] = m_pLinkedEntity->GetLocalOrigin().x;
+        position[1] = m_pLinkedEntity->GetLocalOrigin().y;
+        position[2] = m_pLinkedEntity->GetLocalOrigin().y;
+
+        velocity[0] = m_pLinkedEntity->GetLocalVelocity().x;
+        velocity[1] = m_pLinkedEntity->GetLocalVelocity().y;
+        velocity[2] = m_pLinkedEntity->GetLocalVelocity().z;
 	}
 	else
 	{
