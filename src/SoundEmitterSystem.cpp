@@ -1001,28 +1001,9 @@ public:
         if ( !params.soundname[0] )
             return;
 
-        //if ( Q_stristr(params.soundname, ".ogg" ) )
         if ( !Q_stristr(params.soundname, ".mp3" ) )
         {
-            /*
-            if (sample.IsPlaying())
-            {
-                sample.Stop();
-            }
-
-            if (sample.IsReady())
-                sample.Close();
-
-            sample.SetLooping(false);
-            sample.SetPositional(false);
-
-            sample.Open(params.soundname);
-
-            if (sample.IsReady())
-                sample.Play();
-                */
-
-            g_OpenALSamplePool.CreateNewSample( PSkipSoundChars( params.soundname ) );
+            g_OpenALSamplePool.CreateNewSample( PSkipSoundChars( params.soundname ), ep );
         }
         else
         {
@@ -1050,8 +1031,7 @@ public:
         CBaseEntity *ent = CBaseEntity::Instance( entindex );
         if ( ent )
         {
-            char const *actorModel = STRING( ent->GetModelName() );
-            gender = soundemitterbase->GetActorGender( actorModel );
+            g_OpenALSamplePool.CreateNewSample( PSkipSoundChars( ep.m_pSoundName ), ep );
         }
 
         if ( !soundemitterbase->GetParametersForSound( ep.m_pSoundName, params, gender, true ) )
@@ -1081,46 +1061,6 @@ public:
 #else
             g_SoundEmitterSystem_Base.EmitSound(filter, entindex, ep);
 #endif
-        /*
-#ifdef CLIENT_DLL
-
-
-
-        
-        // Pull data from parameters
-        CSoundParameters params;
-
-        // Try to deduce the actor's gender
-        gender_t gender = GENDER_NONE;
-        CBaseEntity *ent = CBaseEntity::Instance( entindex );
-        if ( ent )
-        {
-            char const *actorModel = STRING( ent->GetModelName() );
-            gender = soundemitterbase->GetActorGender( actorModel );
-        }
-
-        if ( !soundemitterbase->GetParametersForSound( ep.m_pSoundName, params, gender, true ) )
-        {
-            return;
-        }
-
-        if ( !params.soundname[0] )
-            return;
-
-        //if ( Q_stristr(params.soundname, ".ogg" ) )
-        if ( !Q_stristr(params.soundname, ".mp3" ) )
-        {
-            g_OpenALSamplePool.CreateNewSample( PSkipSoundChars( params.soundname ) );
-        }
-        else
-        {
-            // Old-School system
-            g_SoundEmitterSystem_Base.EmitSound(filter, entindex, ep);
-        }
-#else
-        g_SoundEmitterSystem_Base.EmitSound(filter, entindex, ep);
-#endif
-        */
     }
 
     void EmitCloseCaption( IRecipientFilter& filter, int entindex, bool fromplayer, char const *token, CUtlVector< Vector >& originlist, float duration, bool warnifmissing /*= false*/ )

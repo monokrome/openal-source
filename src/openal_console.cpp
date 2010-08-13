@@ -47,9 +47,9 @@ void OpenALPlayDemo(void)
 	if (demoSample->IsReady())
 		demoSample->Play();
     */
+    EmitSound_t ep;
+    oggHandle = g_OpenALSamplePool.CreateNewSample(OGG_DEMO_FILENAME, ep);}
 
-    oggHandle = g_OpenALSamplePool.CreateNewSample(OGG_DEMO_FILENAME);
-}
 
 /***
  * Plays a simple demo in 3D space. Puts the audio source where the player is standing.

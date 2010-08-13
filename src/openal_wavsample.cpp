@@ -34,6 +34,7 @@ static unsigned long readByte32(const unsigned char buffer[4])
 COpenALWavSample::COpenALWavSample()
 {
     m_iDataSize = 0;
+    m_iReadDataSize = 0;
     m_iFrequency = 0;
     m_iDataOffset = 0;
     wavFile = FILESYSTEM_INVALID_HANDLE;
@@ -76,7 +77,7 @@ void COpenALWavSample::Open(const char* filename)
         }
     }
 
-    m_pszFileName = filename;
+    Q_strncpy(m_pszFileName, path, sizeof(m_pszFileName) );
 
     // Magic check
     if ( !filesystem->Read(magic, 4, wavFile) )
