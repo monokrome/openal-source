@@ -3,9 +3,14 @@
 #include "openal_oggsample.h"
 #include "openal_wavsample.h"
 
+
 #include "openal_sample_pool.h"
 
 CSamplePool      g_OpenALSamplePool;
+
+// Stolen from IEngineSound.h
+#define SOUND_FROM_LOCAL_PLAYER		-1
+#define SOUND_FROM_WORLD			0
 
 CSamplePool::CSamplePool()
 {
@@ -49,6 +54,14 @@ SampleHandle_t CSamplePool::GetNewHandle()
     return m_iLastID;
 }
 
+SampleHandle_t CSamplePool::CreateNewSample(const char *filename, const EmitSound_t &ep, bool shouldPlay /* = true */ )
+{
+    SampleHandle_t handle = CreateNewSample(filename, shouldPlay);
+    SetParameters(handle, ep);
+
+    return handle;
+}
+
 SampleHandle_t CSamplePool::CreateNewSample(const char *filename, bool shouldPlay /* = true */ )
 {
     // NOTENOTE:    Consider paths to be of proper format
@@ -79,16 +92,6 @@ SampleHandle_t CSamplePool::CreateNewSample(const char *filename, bool shouldPla
     newSample->SetLooping(false);
     newSample->SetPositional(false);
 
-    /*
-    if (shouldPlay)
-    {
-        if (newSample->IsReady())
-        {
-            newSample->Play();
-        }
-    }
-    */
-
     SampleData_t data;
     data.sample = newSample;
     data.codec = codec;
@@ -102,13 +105,11 @@ SampleHandle_t CSamplePool::CreateNewSample(const char *filename, bool shouldPla
     return data.handle;
 }
 
-void CSamplePool::Stop( SampleHandle_t handle )
+SampleData_t* CSamplePool::AquireSampleFromHandle( SampleHandle_t handle ) 
 {
-    AUTO_LOCK_FM(m_SamplePool);
-
     if (handle == SAMPLE_HANDLE_INVALID)
     {
-        return;
+        return NULL;
     }
 
     int i = 0;
@@ -128,17 +129,48 @@ void CSamplePool::Stop( SampleHandle_t handle )
             continue;;
         }
 
-        // Is the sample invalid?
-        if ( data->sample == NULL )
+        return data;
+    }
+
+    return NULL;
+}
+
+void CSamplePool::SetParameters( SampleHandle_t handle, const EmitSound_t &ep )
+{
+    SampleData_t *data = AquireSampleFromHandle(handle);
+
+    if (!data)
+        return;
+
+    data->sample->SetGain(ep.m_flVolume);
+
+    if (ep.m_nSpeakerEntity != SOUND_FROM_LOCAL_PLAYER)
+    {
+        CBaseEntity *pEnt = CBaseEntity::Instance( ep.m_nSpeakerEntity );
+        if (pEnt!= NULL)
         {
-            i += 1;
-            continue;
+            data->sample->LinkEntity( pEnt );
         }
 
-        data->wants_stop = true;
-
-        break;
+        if (ep.m_pOrigin)
+        {
+            data->sample->SetPosition(ep.m_pOrigin->x, ep.m_pOrigin->y, ep.m_pOrigin->z );
+        }
     }
+}
+
+void CSamplePool::Stop( SampleHandle_t handle )
+{
+    AUTO_LOCK_FM(m_SamplePool);
+
+    SampleData_t *data = AquireSampleFromHandle(handle);
+
+    if (!data)
+    {
+        return;
+    }
+
+    data->wants_stop = true;
 }
 
 void CSamplePool::PreFrame()
@@ -242,11 +274,24 @@ void CSamplePool::Frame()
             continue;
         }
 
+        if ( data.sample->IsFinished() && !data.sample->IsPlaying() )
+        {
+            IOpenALSample *pSample = data.sample;
+
+            pSample->Destroy();
+            delete pSample;
+
+            pSample = NULL;
+
+            m_SamplePool.Remove(i);
+            continue;
+        }
+
         if ( data.sample->IsReady() )
         {
             data.sample->Update(gpGlobals->curtime);
 
-            if ( !data.sample->IsPlaying() )
+            if ( !data.sample->IsPlaying() && !data.sample->IsFinished() )
             {
                 data.sample->Play();
             }
@@ -271,6 +316,11 @@ void CSamplePool::Update()
 }
 
 void CSamplePool::Shutdown()
+{
+    PurgeAll();
+}
+
+void CSamplePool::PurgeAll()
 {
     AUTO_LOCK_FM(m_SamplePool);
 
@@ -305,10 +355,11 @@ void CSamplePool::Shutdown()
         pSample = NULL;
 
         m_SamplePool.Remove(i);
+    }    
+}
 
-        /*
-        else
-            i += 1;
-        */
-    }
+
+CON_COMMAND(openal_purge_samples, "Purges all samples in the pool")
+{
+    g_OpenALSamplePool.PurgeAll();
 }

@@ -34,6 +34,7 @@ static unsigned long readByte32(const unsigned char buffer[4])
 COpenALWavSample::COpenALWavSample()
 {
     m_iDataSize = 0;
+    m_iReadDataSize = 0;
     m_iFrequency = 0;
     m_iDataOffset = 0;
     wavFile = FILESYSTEM_INVALID_HANDLE;
@@ -235,6 +236,11 @@ void COpenALWavSample::Close()
     ClearBuffers();
 }
 
+
+void COpenALWavSample::SubUpdate()
+{
+}
+
 bool COpenALWavSample::CheckStream(ALuint buffer)
 {
     if (!IsReady()) return false;
@@ -266,14 +272,17 @@ bool COpenALWavSample::CheckStream(ALuint buffer)
 
     if (size == 0)
     {
+        m_iReadDataSize = 0;
+
         if (!m_bLooping)
         {
             m_bFinished = true;
+            Stop();
             return false;
         }
 
         // Seek to the beginning of the audio data, skipping the chunks before it
-        filesystem->Seek( wavFile, m_iDataSize, FILESYSTEM_SEEK_HEAD );
+        filesystem->Seek( wavFile, m_iDataOffset, FILESYSTEM_SEEK_HEAD );
 
         // Buffer the new stuff
         result = filesystem->Read( data, OPENAL_BUFFER_SIZE, wavFile );
@@ -282,6 +291,15 @@ bool COpenALWavSample::CheckStream(ALuint buffer)
         {
             size += result;
         }
+    }
+
+    // This prevents us from buffering more than the file itself allows us to.
+    // If we have read more than the actual data chunk length specifies, the 
+    // rest is truncated.
+    m_iReadDataSize += size;
+    if (m_iReadDataSize > m_iDataSize)
+    {
+        size = size - (m_iReadDataSize - m_iDataSize);
     }
 
     BufferData(buffer, format, data, size, m_iFrequency);

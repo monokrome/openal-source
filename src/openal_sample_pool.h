@@ -62,7 +62,15 @@ public:
     // We'll have to update this func when more data is required to pass
     // through to the samples
     SampleHandle_t CreateNewSample(const char *filename, bool shouldPlay = true);
+    SampleHandle_t CreateNewSample(const char *filename, const EmitSound_t &ep, bool shouldPlay = true);
+
+    void SetParameters( SampleHandle_t handle, const EmitSound_t &ep ); // Parses the EmitSound_t struct
+
     void Stop( SampleHandle_t handle );
+
+    SampleData_t* AquireSampleFromHandle( SampleHandle_t handle );
+
+    void PurgeAll();
 
 private:
 
