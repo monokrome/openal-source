@@ -4,7 +4,6 @@
 #include "openal_wavsample.h"
 #include "openal_mp3sample.h"
 
-
 #include "openal_sample_pool.h"
 
 CSamplePool      g_OpenALSamplePool;
