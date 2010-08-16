@@ -209,9 +209,11 @@ void COpenALOggSample::UpdateMetadata()
 	}
 }
 
-COpenALOggLoaderExt::COpenALOggLoaderExt()
+bool COpenALOggLoaderExt::Init()
 {
 	g_OpenALLoader.Register(this, "ogg");
+	
+	return true;
 }
 
 COpenALOggLoaderExt::~COpenALOggLoaderExt()

@@ -1,13 +1,15 @@
 #ifndef __OPENAL_LOADER_H
 #define __OPENAL_LOADER_H
 
+#include "cbase.h"
+#include "tier1/utlhashdict.h"
 #include "openal_sample.h"
 
 /***
  * Each sample type defines a loader extension that will be used by COpenALLoader
  * to retrieve a reference to the provided type of sample.
  **/
-class IOpenALLoaderExt
+class IOpenALLoaderExt : public CAutoGameSystem
 {
 public:
 	virtual IOpenALSample* Get() = 0;
@@ -26,7 +28,7 @@ public:
 	void Deregister(IOpenALLoaderExt *extension, char *fileType);
 
 private:
-	CUtlMap<char*, IOpenALLoaderExt*> m_loaderExtensions;
+	CUtlHashDict<IOpenALLoaderExt*> m_loaderExtensions;
 };
 
 extern COpenALLoader g_OpenALLoader;

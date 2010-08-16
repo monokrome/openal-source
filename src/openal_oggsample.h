@@ -33,7 +33,7 @@ private:
 class COpenALOggLoaderExt : public IOpenALLoaderExt
 {
 public:
-	COpenALOggLoaderExt();
+	virtual bool Init();
 	~COpenALOggLoaderExt();
 
 	virtual IOpenALSample* Get();
