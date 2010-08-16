@@ -16,8 +16,6 @@ public:
     virtual void Open(const char* filename);
     virtual void Close();
 
-    virtual void SubUpdate();
-
     bool CheckStream(ALuint buffer);
 
 private:
@@ -26,7 +24,7 @@ private:
 
     int m_iFrequency;   // Sample rate
 
-    int m_iDataOffset;  // Where in the file is the 
+    int m_iDataOffset;  // Where in the file does the PCM data start?
     int m_iDataSize;    // Total size of PCM data
     int m_iReadDataSize;// How much data has been read this frame
     int m_iDataOffset; // Where in the file is the 

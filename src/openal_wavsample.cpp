@@ -77,7 +77,7 @@ void COpenALWavSample::Open(const char* filename)
         }
     }
 
-    Q_strncpy(m_pszFileName, path, sizeof(m_pszFileName) );
+    m_pszFileName = filename;
 
     // Magic check
     if ( !filesystem->Read(magic, 4, wavFile) )
