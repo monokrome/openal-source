@@ -23,7 +23,6 @@ Coming Soon:
   - Under water audio distortion
   - Occlusion culling (if Source allows)
   - Deafening effects
-- More advanced file loading facilities
 - Entities allowing mappers to modify the state of the system
 - Optional fourier analysis system for beat detection and more
 
