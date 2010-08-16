@@ -26,8 +26,7 @@ private:
 
     int m_iDataOffset;  // Where in the file does the PCM data start?
     int m_iDataSize;    // Total size of PCM data
-    int m_iReadDataSize;// How much data has been read this frame
-    int m_iDataOffset; // Where in the file is the 
+    int m_iReadDataSize;
 };
 
 class COpenALWavLoaderExt : public IOpenALLoaderExt

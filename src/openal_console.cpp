@@ -46,9 +46,7 @@ void OpenALPlayDemo(void)
 
 	if (demoSample->IsReady())
 		demoSample->Play();
-    */
-    EmitSound_t ep;
-    oggHandle = g_OpenALSamplePool.CreateNewSample(OGG_DEMO_FILENAME, ep);}
+}
 
 
 /***
@@ -93,7 +91,6 @@ void OpenALPlayPositionalDemo(void)
 
 	if (demoSample->IsReady())
 		demoSample->Play();
-    */
     */
 }
 

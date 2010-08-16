@@ -246,8 +246,6 @@ void CSamplePool::PreFrame()
 
         i += 1;
     }
-
-    data->wants_stop = true;
 }
 
 void CSamplePool::Frame()
