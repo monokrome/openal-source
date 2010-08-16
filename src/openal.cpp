@@ -120,7 +120,7 @@ bool COpenALGameSystem::Init()
 
 void COpenALGameSystem::PostInit()
 {
-	engine->ClientCmd("openal_ogg_demo_play\n");
+	engine->ClientCmd("openal_play_demo\n");
 }
 
 #endif

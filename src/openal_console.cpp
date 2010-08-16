@@ -10,66 +10,76 @@
 #define OGG_DEMO_FILENAME "demo/demo.ogg"
 #define POS_DEMO_FILENAME "demo/positional.ogg"
 
-COpenALOggSample oggSample;
+IOpenALSample* demoSample;
 
-void OpenALOggDemoPlay(void)
+/***
+ * Stops all demos that rely on the demoSample pointer.
+ **/
+void OpenALStopDemo()
 {
-	if (oggSample.IsReady())
-		oggSample.Close();
+	if (demoSample != NULL)
+	{
+		if (demoSample->IsReady())
+			demoSample->Close();
 
-	oggSample.SetLooping(true);
-	oggSample.SetPositional(false);
-
-	oggSample.Open(OGG_DEMO_FILENAME);
-
-	if (oggSample.IsReady())
-		oggSample.Play();
+		delete demoSample;
+		demoSample = NULL;
+	}
 }
 
-void OpenALPositionalDemoPlay(void)
+/***
+ * Plays a nice little looping demo local to the player position.
+ **/
+void OpenALPlayDemo(void)
+{
+	OpenALStopDemo();
+
+	demoSample = g_OpenALLoader.Load("ogg");
+
+	demoSample->SetLooping(true);
+	demoSample->SetPositional(false);
+
+	demoSample->Open(OGG_DEMO_FILENAME);
+
+	if (demoSample->IsReady())
+		demoSample->Play();
+}
+
+/***
+ * Plays a simple demo in 3D space. Puts the audio source where the player is standing.
+ **/
+void OpenALPlayPositionalDemo(void)
 {
 	CBasePlayer* localPlayer = CBasePlayer::GetLocalPlayer();
 
-	Msg("Initializing demo of positional OpenAL support.\n");
+	OpenALStopDemo();
 
-	if (oggSample.IsReady())
-		oggSample.Close();
-
-	oggSample.SetLooping(true);
+	demoSample = g_OpenALLoader.Load("ogg");
+	demoSample->SetLooping(true);
 
 	if (localPlayer)
 	{
-		oggSample.SetPositional(true);
+		demoSample->SetPositional(true);
 
 		// Does localPlayer need locked now? :/
-		oggSample.SetPosition(localPlayer->GetAbsOrigin());
-		oggSample.SetVelocity(localPlayer->GetAbsVelocity());
+		demoSample->SetPosition(localPlayer->GetAbsOrigin());
+		demoSample->SetVelocity(localPlayer->GetAbsVelocity());
 	}
 	else
 	{
-		Msg("OpenAL: Demo can't find local player. Global enabled.\n");
-		oggSample.SetPositional(false);
+		Msg("OpenAL: Demo can't find local player. Local playback enabled instead of positional.\n");
+		demoSample->SetPositional(false);
 	}
 
-	oggSample.Open(POS_DEMO_FILENAME);
+	demoSample->Open(POS_DEMO_FILENAME);
 
-	if (oggSample.IsReady())
-		oggSample.Play();
+	if (demoSample->IsReady())
+		demoSample->Play();
 }
 
-void OpenALOggDemoStop(void)
-{
-	if (oggSample.IsPlaying())
-	{
-		oggSample.Stop();
-		oggSample.Close();
-	}
-}
-
-ConCommand openal_ogg_demo_play("openal_ogg_demo_play", OpenALOggDemoPlay, "Play the demo of OpenAL's ogg playback.");
-ConCommand openal_ogg_demo_stop("openal_ogg_demo_stop", OpenALOggDemoStop, "Stop the demo of OpenAL's ogg playback.");
-ConCommand openal_positional_demo_play("openal_positional_demo_play", OpenALPositionalDemoPlay, "Play a demo of using OpenAL for positional audio.");
-ConCommand openal_positional_demo_stop("openal_positional_demo_stop", OpenALOggDemoStop, "Stop the demo of using OpenAL for positional audio.");
+ConCommand openal_play_demo("openal_play_demo", OpenALPlayDemo, "Play the demo of OpenAL's ogg playback.");
+ConCommand openal_play_positional_demo("openal_play_positional_demo", OpenALPlayPositionalDemo, "Play a demo of using OpenAL for positional audio.");
+ConCommand openal_stop_demo("openal_stop_demo", OpenALStopDemo, "Stop the current OpenAL playback demo.");
 
 #define WAV_SAMPLE "demo/wave_playback.wav"
 
