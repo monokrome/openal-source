@@ -15,6 +15,7 @@ Features:
   - Uses for "local" audio include a media players, in-game radio, etc.
   - Positional audio can be used to add depth to an environment
 - Samples can be grouped together based on group names
+- Relinking standard Source entities to use OpenAL instead of Miles
 
 Coming Soon:
 ------------
@@ -22,9 +23,7 @@ Coming Soon:
   - Under water audio distortion
   - Occlusion culling (if Source allows)
   - Deafening effects
-- More advanced file loading facilities
 - Entities allowing mappers to modify the state of the system
-- Relinking standard Source entities to use OpenAL instead of Miles
 - Optional fourier analysis system for beat detection and more
 
 Notes:

@@ -36,7 +36,7 @@ void IOpenALSample::Init()
 	alGenBuffers(NUM_BUFFERS, buffers);
 	if (alGetError() != AL_NO_ERROR)
 	{
-		Warning("OpenAL: Error generating a sample's buffers. Sample will not play.\n");
+		Warning("OpenAL: Error generating a saomple's buffers. Sample will not play.\n");
 		return;
 	}
 

@@ -3,6 +3,7 @@
 
 #include "Filesystem.h"
 #include "openal_sample.h"
+#include "openal_loader.h"
 
 #define MAX_PATH_LENGTH 1024
 
@@ -20,6 +21,15 @@ public:
 private:
     FileHandle_t wavFile;
     int m_iFrequency;
+};
+
+class COpenALWavLoaderExt : public IOpenALLoaderExt
+{
+public:
+	virtual bool Init();
+	~COpenALWavLoaderExt();
+
+	virtual IOpenALSample* Get();
 };
 
 #endif // OPENAL_WAVSAMPLE_H
