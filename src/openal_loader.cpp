@@ -8,7 +8,7 @@ IOpenALSample* COpenALLoader::Load(char* fileType)
 {
 	unsigned short index = m_loaderExtensions.Find(fileType);
 
-	if (index != m_loaderExtensions.InvalidIndex())
+	if (index != m_loaderExtensions.InvalidHandle())
 		return m_loaderExtensions[index]->Get();
 
 	return NULL;
@@ -16,7 +16,7 @@ IOpenALSample* COpenALLoader::Load(char* fileType)
 
 void COpenALLoader::Register(IOpenALLoaderExt *extension, char *fileType)
 {
-	if (m_loaderExtensions.Find(fileType) == m_loaderExtensions.InvalidIndex())
+	if (m_loaderExtensions.Find(fileType) == m_loaderExtensions.InvalidHandle())
 		m_loaderExtensions.Insert(fileType, extension);
 
 	else
@@ -27,7 +27,7 @@ void COpenALLoader::Deregister(IOpenALLoaderExt *extension, char *fileType)
 {
 	unsigned short index = m_loaderExtensions.Find(fileType);
 
-	if (index == m_loaderExtensions.InvalidIndex())
+	if (index == m_loaderExtensions.InvalidHandle())
 	{
 		Warning("OpenAL Loader: Attempted to remove \"%s\" reference but that type isn't registered.\n");
 		return;
