@@ -5,6 +5,8 @@
 #include "openal_wavsample.h"
 #include "openal_sample.h"
 #include "openal_loader.h"
+#include "openal_mp3sample.h"
+#include "openal_sample_pool.h"
 //#include "c_basehlplayer.h"
 
 #define OGG_DEMO_FILENAME "demo/demo.ogg"
@@ -123,3 +125,29 @@ void OpenALWavStop()
 
 ConCommand openal_wav_demo_play("openal_wav_demo_play", OpenALWavStart, "Play the demo of OpenAL's wav playback.");
 ConCommand openal_wav_demo_stop("openal_wav_demo_stop", OpenALWavStop, "Stop the demo of OpenAL's wav playback.");
+
+#define MP3_SAMPLE "demo/mp3_playback.mp3"
+
+COpenALMp3Sample mp3Sample;
+SampleHandle_t mp3Handle = SAMPLE_HANDLE_INVALID;
+
+void OpenALMp3Start()
+{
+    if (mp3Handle == SAMPLE_HANDLE_INVALID)
+    {
+        EmitSound_t ep;
+        mp3Handle = g_OpenALSamplePool.CreateNewSample(MP3_SAMPLE, ep);
+    }
+}
+
+void OpenALMp3Stop()
+{
+    if (mp3Handle != SAMPLE_HANDLE_INVALID)
+    {
+        g_OpenALSamplePool.Stop(mp3Handle);
+        mp3Handle = SAMPLE_HANDLE_INVALID;
+    }
+}
+
+ConCommand openal_mp3_demo_play("openal_mp3_demo_play", OpenALMp3Start, "Play the demo of OpenAL's mp3 playback.");
+ConCommand openal_mp3_demo_stop("openal_mp3_demo_stop", OpenALMp3Stop, "Stop the demo of OpenAL's mp3 playback.");

@@ -12,6 +12,7 @@ enum CodecType
     CODEC_NONE,
     CODEC_WAV,
     CODEC_OGG,
+    CODEC_MP3,
 };
 
 #define CODEC_LAST = CODEC_OGG

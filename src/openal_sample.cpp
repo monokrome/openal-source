@@ -287,10 +287,11 @@ void IOpenALSample::ClearBuffers()
 void IOpenALSample::BufferData(ALuint bufferID, ALenum format, const ALvoid* data, ALsizei size, ALsizei freq)
 {
 	alBufferData(bufferID, format, data, size, freq);
-	if (alGetError() != AL_NO_ERROR)
+    ALenum error = alGetError();
+	if (error != AL_NO_ERROR)
 	{
 		Warning("OpenAL: There was an error buffering audio data. Releasing deadly neurotoxin in 3... 2.. 1..\n");
-        ERROR_OUTPUT(alGetError());
+        ERROR_OUTPUT(error);
 	}
 }
 

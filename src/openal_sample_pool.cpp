@@ -2,7 +2,7 @@
 
 #include "openal_oggsample.h"
 #include "openal_wavsample.h"
-
+#include "openal_mp3sample.h"
 
 #include "openal_sample_pool.h"
 
@@ -44,6 +44,11 @@ CodecType CSamplePool::GetCodecFromFileName( const char *filename )
     {
         return CODEC_WAV;
     }
+
+    if (Q_stristr(filename, ".mp3"))
+    {
+        return CODEC_MP3;
+    }
     
     return CODEC_NONE;
 }
@@ -80,6 +85,9 @@ SampleHandle_t CSamplePool::CreateNewSample(const char *filename, bool shouldPla
         break;
     case CODEC_WAV:
         newSample = new COpenALWavSample();
+        break;
+    case CODEC_MP3:
+        newSample = new COpenALMp3Sample();
         break;
     //case CODEC_NONE:
     default:
