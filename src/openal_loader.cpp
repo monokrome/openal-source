@@ -36,6 +36,6 @@ void COpenALLoader::Deregister(IOpenALLoaderExt *extension, char *fileType)
 		return;
 	}
 
-//	if (m_loaderExtensions[index] == extension)
-//		m_loaderExtensions.Remove(fileType);
+	if (m_loaderExtensions[index] == extension)
+		m_loaderExtensions.Remove(fileType);
 }
