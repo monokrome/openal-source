@@ -251,14 +251,14 @@ bool COpenALWavSample::CheckStream(ALuint buffer)
 
 bool COpenALWavLoaderExt::Init()
 {
-	g_OpenALLoader.Register(this, "ogg");
+	g_OpenALLoader.Register(this, "wav");
 	
 	return true;
 }
 
 COpenALWavLoaderExt::~COpenALWavLoaderExt()
 {
-	g_OpenALLoader.Deregister(this, "ogg");
+	g_OpenALLoader.Deregister(this, "wav");
 }
 
 IOpenALSample* COpenALWavLoaderExt::Get()

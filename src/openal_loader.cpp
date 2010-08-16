@@ -9,7 +9,10 @@ IOpenALSample* COpenALLoader::Load(char* fileType)
 	unsigned short index = m_loaderExtensions.Find(fileType);
 
 	if (index != m_loaderExtensions.InvalidHandle())
+	{
+		Warning("Returning a \"%s\" file.", fileType);
 		return m_loaderExtensions[index]->Get();
+	}
 
 	return NULL;
 }
@@ -33,6 +36,6 @@ void COpenALLoader::Deregister(IOpenALLoaderExt *extension, char *fileType)
 		return;
 	}
 
-	if (m_loaderExtensions[index] == extension)
-		m_loaderExtensions.Remove(fileType);
+//	if (m_loaderExtensions[index] == extension)
+//		m_loaderExtensions.Remove(fileType);
 }

@@ -11,7 +11,6 @@
 #define POS_DEMO_FILENAME "demo/positional.ogg"
 
 COpenALOggSample oggSample;
-IOpenALSample* loaderSample;
 
 void OpenALOggDemoPlay(void)
 {
@@ -26,7 +25,6 @@ void OpenALOggDemoPlay(void)
 	if (oggSample.IsReady())
 		oggSample.Play();
 }
-
 
 void OpenALPositionalDemoPlay(void)
 {
