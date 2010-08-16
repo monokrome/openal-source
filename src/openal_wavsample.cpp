@@ -237,11 +237,6 @@ void COpenALWavSample::Close()
     ClearBuffers();
 }
 
-
-void COpenALWavSample::SubUpdate()
-{
-}
-
 bool COpenALWavSample::CheckStream(ALuint buffer)
 {
     if (!IsReady()) return false;
