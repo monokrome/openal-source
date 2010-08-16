@@ -9,10 +9,7 @@ IOpenALSample* COpenALLoader::Load(char* fileType)
 	unsigned short index = m_loaderExtensions.Find(fileType);
 
 	if (index != m_loaderExtensions.InvalidHandle())
-	{
-		Warning("Returning a \"%s\" file.", fileType);
 		return m_loaderExtensions[index]->Get();
-	}
 
 	return NULL;
 }
