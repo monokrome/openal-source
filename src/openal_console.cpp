@@ -160,3 +160,50 @@ void OpenALMp3Stop()
 
 ConCommand openal_mp3_demo_play("openal_mp3_demo_play", OpenALMp3Start, "Play the demo of OpenAL's mp3 playback.");
 ConCommand openal_mp3_demo_stop("openal_mp3_demo_stop", OpenALMp3Stop, "Stop the demo of OpenAL's mp3 playback.");
+
+IOpenALSample* sample;
+
+CON_COMMAND( openal_play, "Playes the specified file using OpenAL. Specify 0 to stop" )
+{
+    if ( args.ArgC() != 2 )
+        return;
+
+    if (sample != NULL && sample->IsReady())
+    {
+        sample->Close();
+    }
+
+    delete sample;
+    sample = NULL;
+
+    const char *filename = args.Arg(1); 
+    const char *codec_name = NULL;
+
+    if ( FStrEq(filename, "0") )
+        return;
+
+    // We need a way cooler function for this
+    // Hint: strrchr and strlen
+    if ( Q_stristr(filename, ".wav") )
+        codec_name = "wav";
+    else if ( Q_stristr(filename, ".ogg") )
+        codec_name = "ogg";
+    else if ( Q_stristr(filename, ".mp3") )
+        codec_name = "mp3";
+
+    if (codec_name == NULL)
+        return;
+
+    sample = g_OpenALLoader.Load(codec_name);
+
+    if (sample == NULL)
+        return;
+
+    sample->SetLooping(true);
+    sample->SetPositional(false);
+
+    sample->Open(filename);
+
+    if (sample->IsReady())
+        sample->Play();
+}

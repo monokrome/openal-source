@@ -3,11 +3,9 @@
 
 #include "Filesystem.h"
 #include "openal_sample.h"
+#include "openal/openal_loader.h"
 
 #include <libmad/mad.h>
-#include <libmad/synth.h>
-#include <libmad/frame.h>
-#include <libmad/timer.h>
 
 #define MAX_PATH_LENGTH 1024
 #define INPUT_BUFFER_SIZE (40000)
@@ -57,6 +55,15 @@ public:
     int freq;
     bool hitEOF;
     //int ReadSize;
+};
+
+class COpenALMp3LoaderExt : public IOpenALLoaderExt
+{
+public:
+	virtual bool Init();
+	~COpenALMp3LoaderExt();
+
+	virtual IOpenALSample* Get();
 };
 
 #endif

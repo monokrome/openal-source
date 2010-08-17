@@ -628,3 +628,22 @@ bool COpenALMp3Sample::CheckStream(ALuint buffer)
 void COpenALMp3Sample::DestroyFormat()
 {
 }
+
+COpenALMp3LoaderExt mp3Loader;
+
+bool COpenALMp3LoaderExt::Init()
+{
+    g_OpenALLoader.Register(this, "mp3");
+
+    return true;
+}
+
+COpenALMp3LoaderExt::~COpenALMp3LoaderExt()
+{
+    g_OpenALLoader.Deregister(this, "mp3");
+}
+
+IOpenALSample* COpenALMp3LoaderExt::Get()
+{
+    return new COpenALMp3Sample();
+}
