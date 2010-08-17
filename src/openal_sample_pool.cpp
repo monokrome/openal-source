@@ -15,7 +15,7 @@ CSamplePool      g_OpenALSamplePool;
 CSamplePool::CSamplePool()
 {
     m_SamplePool.Purge();
-    m_iLastID = SAMPLE_HANDLE_INVALID;
+    m_iLastID = INVALID_SAMPLE_HANDLE;
 }
 
 CSamplePool::~CSamplePool()
@@ -33,19 +33,10 @@ bool CSamplePool::ShouldHandleThisSound(const char *filename)
     return false;
 }
 
-CodecType CSamplePool::GetCodecFromFileName( const char *filename )
+const char* CSamplePool::GetCodecFromFileName( const char *filename )
 {
-    if (Q_stristr(filename, ".ogg") ) 
-    {
-        return CODEC_OGG;
-    }
-
-    if (Q_stristr(filename, ".wav") ) 
-    {
-        return CODEC_WAV;
-    }
-    
-    return CODEC_NONE;
+    // Delete me
+    return NULL;
 }
 
 SampleHandle_t CSamplePool::GetNewHandle()
@@ -72,19 +63,21 @@ SampleHandle_t CSamplePool::CreateNewSample(const char *filename, bool shouldPla
     IOpenALSample *newSample = NULL;
 
     // Figure out the proper codec
-    CodecType codec = GetCodecFromFileName(filename);
-    switch (codec)
+    char extension[8];
+    V_ExtractFileExtension(filename, extension, sizeof(extension) );
+    char *codec = extension;
+
+    if (codec == NULL)
     {
-    case CODEC_OGG:
-        newSample = new COpenALOggSample();
-        break;
-    case CODEC_WAV:
-        newSample = new COpenALWavSample();
-        break;
-    //case CODEC_NONE:
-    default:
-        Warning("Unable to resolve codec for %s", filename);
-        return SAMPLE_HANDLE_INVALID;
+        Warning("Sample Pool: Unable to resolve sample for filename %s\n", filename);
+        return INVALID_SAMPLE_HANDLE;
+    }
+    
+    newSample = g_OpenALLoader.Load(codec);
+
+    if (newSample == NULL)
+    {
+        return INVALID_SAMPLE_HANDLE;
     }
 
     newSample->Open(filename);
@@ -107,7 +100,7 @@ SampleHandle_t CSamplePool::CreateNewSample(const char *filename, bool shouldPla
 
 SampleData_t* CSamplePool::AquireSampleFromHandle( SampleHandle_t handle ) 
 {
-    if (handle == SAMPLE_HANDLE_INVALID)
+    if (handle == INVALID_SAMPLE_HANDLE)
     {
         return NULL;
     }
@@ -209,7 +202,7 @@ void CSamplePool::PreFrame()
             continue;
         }
 
-        if (data.codec == CODEC_NONE)
+        if (data.codec == NULL)
         {
             IOpenALSample *pSample = data.sample;
 
@@ -267,8 +260,8 @@ void CSamplePool::Frame()
             continue;
         }
 
-        Assert( data.codec != CODEC_NONE);
-        if (data.codec == CODEC_NONE)
+        Assert( data.codec != NULL);
+        if (data.codec == NULL)
         {
             i += 1;
             continue;

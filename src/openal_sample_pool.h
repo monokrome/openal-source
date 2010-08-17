@@ -18,7 +18,7 @@ enum CodecType
 
 // This is used to reference samples in the pool, 
 typedef int SampleHandle_t;
-#define SAMPLE_HANDLE_INVALID -1
+#define INVALID_SAMPLE_HANDLE -1
 
 struct SampleData_t 
 {
@@ -29,15 +29,15 @@ struct SampleData_t
 
     void Reset()
     {
-        handle = SAMPLE_HANDLE_INVALID;
+        handle = INVALID_SAMPLE_HANDLE;
         sample = NULL;
-        codec = CODEC_NONE;
+        codec = NULL;
         wants_stop = false;
     }
     
     int handle;
     IOpenALSample *sample;
-    CodecType codec;
+    const char *codec;
     bool wants_stop;
     //EmitSound_t data;
 };
@@ -77,7 +77,7 @@ private:
     SampleHandle_t  GetNewHandle();
     int     m_iLastID;
 
-    CodecType GetCodecFromFileName( const char *filename );
+    const char* GetCodecFromFileName( const char *filename );
 
     CUtlVectorMT<CUtlVector<SampleData_t>>   m_SamplePool;
 };

@@ -8,8 +8,8 @@ IOpenALSample* COpenALLoader::Load(char* fileType)
 {
 	unsigned short index = m_loaderExtensions.Find(fileType);
 
-	if (index != m_loaderExtensions.InvalidHandle())
-		return m_loaderExtensions[index]->Get();
+    if ( m_loaderExtensions.IsValidIndex(index) )
+        return m_loaderExtensions[index]->Get();
 
 	return NULL;
 }

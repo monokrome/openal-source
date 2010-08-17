@@ -12,21 +12,17 @@
 #define POS_DEMO_FILENAME "demo/positional.ogg"
 
 IOpenALSample* demoSample;
-SampleHandle_t oggHandle;
+SampleHandle_t oggHandle = INVALID_SAMPLE_HANDLE;
 
 /***
  * Stops all demos that rely on the demoSample pointer.
  **/
 void OpenALStopDemo()
 {
-	if (demoSample != NULL)
-	{
-		if (demoSample->IsReady())
-			demoSample->Close();
-
-		delete demoSample;
-		demoSample = NULL;
-	}
+    if (oggHandle != INVALID_SAMPLE_HANDLE)
+    {
+        g_OpenALSamplePool.Stop(oggHandle);
+    }
 }
 
 /***
@@ -35,17 +31,7 @@ void OpenALStopDemo()
 void OpenALPlayDemo(void)
 {
 	OpenALStopDemo();
-
-	demoSample = g_OpenALLoader.Load("ogg");
-
-	demoSample->SetLooping(true);
-	demoSample->SetPositional(false);
-
-	demoSample->Open(OGG_DEMO_FILENAME);
-
-	if (demoSample->IsReady())
-		demoSample->Play();
-
+    oggHandle = g_OpenALSamplePool.CreateNewSample(OGG_DEMO_FILENAME);
 }
 
 /***
@@ -96,37 +82,22 @@ ConCommand openal_stop_demo("openal_stop_demo", OpenALStopDemo, "Stop the curren
 COpenALWavSample wavSample;
 SampleHandle_t wavHandle;
 
-void OpenALWavStart()
-{
-    /*
-    if ( wavSample.IsReady() )
-    {
-        wavSample.Close();
-    }
-
-    wavSample.SetLooping(true);
-    wavSample.SetPositional(false);
-
-    wavSample.Open(WAV_SAMPLE);
-
-    if (wavSample.IsReady())
-        wavSample.Play();
-    */
-
-    EmitSound_t ep;
-    wavHandle = g_OpenALSamplePool.CreateNewSample(WAV_SAMPLE, ep);
-}
-
 void OpenALWavStop()
 {
-    /*
-    if (wavSample.IsPlaying())
-    {
-        wavSample.Stop();
-        wavSample.Close();
-    }
-    */
     g_OpenALSamplePool.Stop(wavHandle);
+}
+
+/***
+ * Plays an even nicer little demo local to the player position.
+ **/
+void OpenALWavStart()
+{
+    if (wavHandle != INVALID_SAMPLE_HANDLE)
+    {
+        OpenALWavStop();
+    }
+
+    wavHandle = g_OpenALSamplePool.CreateNewSample(WAV_SAMPLE);
 }
 
 ConCommand openal_wav_demo_play("openal_wav_demo_play", OpenALWavStart, "Play the demo of OpenAL's wav playback.");

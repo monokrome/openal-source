@@ -307,19 +307,24 @@ bool COpenALWavSample::CheckStream(ALuint buffer)
     return true;
 }
 
-bool COpenALWavLoaderExt::Init()
+class COpenALWavLoaderExt : public IOpenALLoaderExt
 {
-	g_OpenALLoader.Register(this, "wav");
-	
-	return true;
-}
+public:
+    bool Init()
+    {
+        g_OpenALLoader.Register(this, "wav");
+        return true;
+    }
 
-COpenALWavLoaderExt::~COpenALWavLoaderExt()
-{
-	g_OpenALLoader.Deregister(this, "wav");
-}
+    ~COpenALWavLoaderExt()
+    {
+        g_OpenALLoader.Deregister(this, "wav");
+    }
 
-IOpenALSample* COpenALWavLoaderExt::Get()
-{
-	return new COpenALWavSample();
-}
+    IOpenALSample* Get()
+    {
+        return new COpenALWavSample();
+    }
+};
+
+COpenALWavLoaderExt wavLoader;

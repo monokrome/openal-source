@@ -3,7 +3,6 @@
 
 #include "Filesystem.h"
 #include "openal_sample.h"
-#include "openal_loader.h"
 
 #define MAX_PATH_LENGTH 1024
 
@@ -29,15 +28,6 @@ private:
     int m_iDataOffset;  // Where in the file is the 
     int m_iDataSize;    // Total size of PCM data
     int m_iReadDataSize;// How much data has been read this frame
-};
-
-class COpenALWavLoaderExt : public IOpenALLoaderExt
-{
-public:
-	virtual bool Init();
-	~COpenALWavLoaderExt();
-
-	virtual IOpenALSample* Get();
 };
 
 #endif // OPENAL_WAVSAMPLE_H
