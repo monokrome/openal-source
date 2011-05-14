@@ -102,3 +102,26 @@ void OpenALWavStart()
 
 ConCommand openal_wav_demo_play("openal_wav_demo_play", OpenALWavStart, "Play the demo of OpenAL's wav playback.");
 ConCommand openal_wav_demo_stop("openal_wav_demo_stop", OpenALWavStop, "Stop the demo of OpenAL's wav playback.");
+
+#define FLAC_SAMPLE "demo/flac_playback.flac"
+
+SampleHandle_t flacHandle = INVALID_SAMPLE_HANDLE;
+
+void OpenALFLACStop()
+{
+    g_OpenALSamplePool.Stop(flacHandle);
+    flacHandle = INVALID_SAMPLE_HANDLE;
+}
+
+void OpenALFLACStart()
+{
+    if (flacHandle != INVALID_SAMPLE_HANDLE)
+    {
+        OpenALFLACStop();
+    }
+
+    flacHandle = g_OpenALSamplePool.CreateNewSample(FLAC_SAMPLE);
+}
+
+ConCommand openal_flac_demo_play("openal_flac_demo_play", OpenALFLACStart, "Play the demo of OpenAL's FLAC playback.");
+ConCommand openal_flac_demo_stop("openal_flac_demo_stop", OpenALFLACStop, "Stop the demo of OpenAL's FLAC playback.");
