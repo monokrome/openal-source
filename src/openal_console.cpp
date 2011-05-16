@@ -11,17 +11,16 @@
 #define OGG_DEMO_FILENAME "demo/demo.ogg"
 #define POS_DEMO_FILENAME "demo/positional.ogg"
 
-IOpenALSample* demoSample;
-SampleHandle_t oggHandle = INVALID_SAMPLE_HANDLE;
+IOpenALSample* demoSample = NULL;
 
 /***
  * Stops all demos that rely on the demoSample pointer.
  **/
 void OpenALStopDemo()
 {
-    if (oggHandle != INVALID_SAMPLE_HANDLE)
+    if (demoSample != NULL)
     {
-        g_OpenALSamplePool.Stop(oggHandle);
+        demoSample->Stop();
     }
 }
 
@@ -30,8 +29,23 @@ void OpenALStopDemo()
  **/
 void OpenALPlayDemo(void)
 {
-	OpenALStopDemo();
-    oggHandle = g_OpenALSamplePool.CreateNewSample(OGG_DEMO_FILENAME);
+    if (demoSample == NULL)
+    {
+        demoSample = g_OpenALLoader.Load("ogg");
+
+        if (demoSample == NULL)
+        {
+            return;
+        }
+    }
+
+    if (demoSample->IsPlaying())
+    {
+        demoSample->Stop();
+    }
+
+    demoSample->Open(OGG_DEMO_FILENAME);
+    demoSample->Play();
 }
 
 /***
@@ -79,12 +93,14 @@ ConCommand openal_stop_demo("openal_stop_demo", OpenALStopDemo, "Stop the curren
 
 #define WAV_SAMPLE "demo/wave_playback.wav"
 
-COpenALWavSample wavSample;
-SampleHandle_t wavHandle;
+IOpenALSample *wavSample = NULL;
 
 void OpenALWavStop()
 {
-    g_OpenALSamplePool.Stop(wavHandle);
+    if (wavSample != NULL)
+    {
+        wavSample->Stop();
+    }
 }
 
 /***
@@ -92,35 +108,59 @@ void OpenALWavStop()
  **/
 void OpenALWavStart()
 {
-    if (wavHandle != INVALID_SAMPLE_HANDLE)
+    if (wavSample == NULL)
     {
-        OpenALWavStop();
+        wavSample = g_OpenALLoader.Load("wav");
+
+        if (wavSample == NULL)
+        {
+            return;
+        }
     }
 
-    wavHandle = g_OpenALSamplePool.CreateNewSample(WAV_SAMPLE);
+    if (wavSample->IsPlaying())
+    {
+        wavSample->Stop();
+    }
+
+    wavSample->Open(WAV_SAMPLE);
+    wavSample->Play();
 }
 
 ConCommand openal_wav_demo_play("openal_wav_demo_play", OpenALWavStart, "Play the demo of OpenAL's wav playback.");
 ConCommand openal_wav_demo_stop("openal_wav_demo_stop", OpenALWavStop, "Stop the demo of OpenAL's wav playback.");
 
-#define FLAC_SAMPLE "demo/flac_playback.flac"
+#define FLAC_SAMPLE "demo/demo.flac"
 
-SampleHandle_t flacHandle = INVALID_SAMPLE_HANDLE;
+IOpenALSample *flacSample = NULL;
 
 void OpenALFLACStop()
 {
-    g_OpenALSamplePool.Stop(flacHandle);
-    flacHandle = INVALID_SAMPLE_HANDLE;
+    if (flacSample != NULL)
+    {
+        flacSample->Stop();
+    }
 }
 
 void OpenALFLACStart()
 {
-    if (flacHandle != INVALID_SAMPLE_HANDLE)
+    if (flacSample == NULL)
     {
-        OpenALFLACStop();
+        flacSample = g_OpenALLoader.Load("flac");
+
+        if (flacSample == NULL)
+        {
+            return;
+        }
     }
 
-    flacHandle = g_OpenALSamplePool.CreateNewSample(FLAC_SAMPLE);
+    if (flacSample->IsPlaying())
+    {
+        flacSample->Stop();
+    }
+
+    flacSample->Open(FLAC_SAMPLE);
+    flacSample->Play();
 }
 
 ConCommand openal_flac_demo_play("openal_flac_demo_play", OpenALFLACStart, "Play the demo of OpenAL's FLAC playback.");

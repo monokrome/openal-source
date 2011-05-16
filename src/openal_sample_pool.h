@@ -82,6 +82,6 @@ private:
     CUtlVectorMT<CUtlVector<SampleData_t>>   m_SamplePool;
 };
 
-extern CSamplePool g_OpenALSamplePool;
+//extern CSamplePool g_OpenALSamplePool;
 
 #endif // OPENAL_SAMPLE_POOL_H

@@ -6,7 +6,7 @@
 
 #include "openal_sample_pool.h"
 
-CSamplePool      g_OpenALSamplePool;
+//CSamplePool      g_OpenALSamplePool;
 
 // Stolen from IEngineSound.h
 #define SOUND_FROM_LOCAL_PLAYER		-1
@@ -92,7 +92,7 @@ SampleHandle_t CSamplePool::CreateNewSample(const char *filename, bool shouldPla
 
     Msg("Sound %s played through OpenAL\n", filename);
 
-    AUTO_LOCK_FM(m_SamplePool);
+    //AUTO_LOCK_FM(m_SamplePool);
 
     m_SamplePool.AddToTail(data);
     return data.handle;
@@ -154,7 +154,7 @@ void CSamplePool::SetParameters( SampleHandle_t handle, const EmitSound_t &ep )
 
 void CSamplePool::Stop( SampleHandle_t handle )
 {
-    AUTO_LOCK_FM(m_SamplePool);
+    //AUTO_LOCK_FM(m_SamplePool);
 
     SampleData_t *data = AquireSampleFromHandle(handle);
 
@@ -351,8 +351,9 @@ void CSamplePool::PurgeAll()
     }    
 }
 
-
+/*
 CON_COMMAND(openal_purge_samples, "Purges all samples in the pool")
 {
     g_OpenALSamplePool.PurgeAll();
 }
+*/
