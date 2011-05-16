@@ -2,11 +2,17 @@
 #include "openal.h"
 #include "openal_flacsample.h"
 
-#include "FLAC++/decoder.h"
-#include "FLAC/stream_decoder.h"
+//#include "FLAC++/decoder.h"
+//#include "FLAC/stream_decoder.h"
 
 COpenALFLACSample::COpenALFLACSample()
 {
+    m_pWriteData = NULL;
+    m_pWriteDataEnd = NULL;
+    size = 0;
+    sampleRate = 0;
+    sizeOfLast = 0;
+    hitEOF = false;
 }
 
 COpenALFLACSample::~COpenALFLACSample()
@@ -16,6 +22,20 @@ COpenALFLACSample::~COpenALFLACSample()
 void COpenALFLACSample::Open(const char* filename)
 {
 	char abspath[MAX_PATH_LENGTH];
+
+    m_pWriteData = NULL;
+    m_pWriteDataEnd = NULL;
+    size = 0;
+    sampleRate = 0;
+    sizeOfLast = 0;
+    hitEOF = false;
+
+    if (!FLAC::Decoder::Stream::is_valid())
+    {
+        FLAC__StreamDecoderState state = FLAC::Decoder::Stream::get_state();
+        Warning("FLAC: Unable to initialize: %s", FLAC__StreamDecoderStateString[state] );
+        return;
+    }
 
 	// Gets an absolute path to the provided filename
 	g_OpenALGameSystem.GetSoundPath(filename, abspath, sizeof(abspath));

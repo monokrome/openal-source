@@ -1,10 +1,14 @@
 #ifndef __OPENAL_OGGSAMPLE_H
 #define __OPENAL_OGGSAMPLE_H
 
+#define FLAC__NO_DLL
+
 #include "Filesystem.h"
 #include "openal_sample.h"
 #include "openal_loader.h"
 #include "FLAC++/decoder.h"
+#include "FLAC/stream_decoder.h"
+
 
 #define MAX_PATH_LENGTH 1024
 
