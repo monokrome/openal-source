@@ -2,7 +2,7 @@
 
 #include "openal_oggsample.h"
 #include "openal_wavsample.h"
-
+#include "openal_mp3sample.h"
 
 #include "openal_sample_pool.h"
 
@@ -33,10 +33,24 @@ bool CSamplePool::ShouldHandleThisSound(const char *filename)
     return false;
 }
 
-const char* CSamplePool::GetCodecFromFileName( const char *filename )
+CodecType CSamplePool::GetCodecFromFileName( const char *filename )
 {
-    // Delete me
-    return NULL;
+    if (Q_stristr(filename, ".ogg") ) 
+    {
+        return CODEC_OGG;
+    }
+
+    if (Q_stristr(filename, ".wav") ) 
+    {
+        return CODEC_WAV;
+    }
+
+    if (Q_stristr(filename, ".mp3"))
+    {
+        return CODEC_MP3;
+    }
+    
+    return CODEC_NONE;
 }
 
 SampleHandle_t CSamplePool::GetNewHandle()
@@ -63,21 +77,22 @@ SampleHandle_t CSamplePool::CreateNewSample(const char *filename, bool shouldPla
     IOpenALSample *newSample = NULL;
 
     // Figure out the proper codec
-    char extension[8];
-    V_ExtractFileExtension(filename, extension, sizeof(extension) );
-    char *codec = extension;
-
-    if (codec == NULL)
+    CodecType codec = GetCodecFromFileName(filename);
+    switch (codec)
     {
-        Warning("Sample Pool: Unable to resolve sample for filename %s\n", filename);
-        return INVALID_SAMPLE_HANDLE;
-    }
-    
-    newSample = g_OpenALLoader.Load(codec);
-
-    if (newSample == NULL)
-    {
-        return INVALID_SAMPLE_HANDLE;
+    case CODEC_OGG:
+        newSample = new COpenALOggSample();
+        break;
+    case CODEC_WAV:
+        newSample = new COpenALWavSample();
+        break;
+    case CODEC_MP3:
+        newSample = new COpenALMp3Sample();
+        break;
+    //case CODEC_NONE:
+    default:
+        Warning("Unable to resolve codec for %s", filename);
+        return SAMPLE_HANDLE_INVALID;
     }
 
     newSample->Open(filename);
@@ -92,7 +107,7 @@ SampleHandle_t CSamplePool::CreateNewSample(const char *filename, bool shouldPla
 
     Msg("Sound %s played through OpenAL\n", filename);
 
-    //AUTO_LOCK_FM(m_SamplePool);
+    AUTO_LOCK_FM(m_SamplePool);
 
     m_SamplePool.AddToTail(data);
     return data.handle;
@@ -100,7 +115,7 @@ SampleHandle_t CSamplePool::CreateNewSample(const char *filename, bool shouldPla
 
 SampleData_t* CSamplePool::AquireSampleFromHandle( SampleHandle_t handle ) 
 {
-    if (handle == INVALID_SAMPLE_HANDLE)
+    if (handle == SAMPLE_HANDLE_INVALID)
     {
         return NULL;
     }
@@ -154,7 +169,7 @@ void CSamplePool::SetParameters( SampleHandle_t handle, const EmitSound_t &ep )
 
 void CSamplePool::Stop( SampleHandle_t handle )
 {
-    //AUTO_LOCK_FM(m_SamplePool);
+    AUTO_LOCK_FM(m_SamplePool);
 
     SampleData_t *data = AquireSampleFromHandle(handle);
 
@@ -202,7 +217,7 @@ void CSamplePool::PreFrame()
             continue;
         }
 
-        if (data.codec == NULL)
+        if (data.codec == CODEC_NONE)
         {
             IOpenALSample *pSample = data.sample;
 
@@ -260,8 +275,8 @@ void CSamplePool::Frame()
             continue;
         }
 
-        Assert( data.codec != NULL);
-        if (data.codec == NULL)
+        Assert( data.codec != CODEC_NONE);
+        if (data.codec == CODEC_NONE)
         {
             i += 1;
             continue;
@@ -336,13 +351,12 @@ void CSamplePool::PurgeAll()
 
         IOpenALSample *pSample = m_SamplePool[i].sample;
 
-        if (pSample == NULL)
-        {
-            i += 1;
-            continue;
-        }
-
-        pSample->Destroy();
+/*
+CON_COMMAND(openal_purge_samples, "Purges all samples in the pool")
+{
+    g_OpenALSamplePool.PurgeAll();
+}
+*/
         delete pSample;
 
         pSample = NULL;
@@ -351,9 +365,8 @@ void CSamplePool::PurgeAll()
     }    
 }
 
-/*
+
 CON_COMMAND(openal_purge_samples, "Purges all samples in the pool")
 {
     g_OpenALSamplePool.PurgeAll();
 }
-*/

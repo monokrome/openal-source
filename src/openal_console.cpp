@@ -5,7 +5,7 @@
 #include "openal_wavsample.h"
 #include "openal_sample.h"
 #include "openal_loader.h"
-#include "openal_sample_pool.h"
+#include "openal_mp3sample.h"
 //#include "c_basehlplayer.h"
 
 #define OGG_DEMO_FILENAME "demo/demo.ogg"
@@ -47,6 +47,7 @@ void OpenALPlayDemo(void)
     demoSample->Open(OGG_DEMO_FILENAME);
     demoSample->Play();
 }
+
 
 /***
  * Plays a simple demo in 3D space. Puts the audio source where the player is standing.
@@ -165,3 +166,40 @@ void OpenALFLACStart()
 
 ConCommand openal_flac_demo_play("openal_flac_demo_play", OpenALFLACStart, "Play the demo of OpenAL's FLAC playback.");
 ConCommand openal_flac_demo_stop("openal_flac_demo_stop", OpenALFLACStop, "Stop the demo of OpenAL's FLAC playback.");
+
+
+#define MP3_SAMPLE "demo/demo.mp3"
+
+IOpenALSample *mp3Sample = NULL;
+
+void OpenALMP3Stop()
+{
+    if (mp3Sample != NULL)
+    {
+        mp3Sample->Stop();
+    }
+}
+
+void OpenALMP3Start()
+{
+    if (mp3Sample == NULL)
+    {
+        mp3Sample = g_OpenALLoader.Load("mp3");
+
+        if (mp3Sample == NULL)
+        {
+            return;
+        }
+    }
+
+    if (mp3Sample->IsPlaying())
+    {
+        mp3Sample->Stop();
+    }
+
+    mp3Sample->Open(MP3_SAMPLE);
+    mp3Sample->Play();
+}
+
+ConCommand openal_mp3_demo_play("openal_mp3_demo_play", OpenALMP3Start, "Play the demo of OpenAL's FLAC playback.");
+ConCommand openal_mp3_demo_stop("openal_mp3_demo_stop", OpenALMP3Stop, "Stop the demo of OpenAL's FLAC playback.");

@@ -137,7 +137,6 @@ void COpenALGameSystem::Shutdown()
 		delete m_vSamples[i];
 	}
     
-
 	m_vSamples.RemoveAll();
     
 	if (m_alDevice != NULL)

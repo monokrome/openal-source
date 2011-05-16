@@ -20,14 +20,14 @@ public:
     bool CheckStream(ALuint buffer);
 
 private:
-    char m_pszFileName[MAX_PATH_LENGTH]; // Debugging fun
+    const char *m_pszFileName;
     FileHandle_t wavFile;
 
     int m_iFrequency;   // Sample rate
 
-    int m_iDataOffset;  // Where in the file is the 
+    int m_iDataOffset;  // Where in the file does the PCM data start?
     int m_iDataSize;    // Total size of PCM data
-    int m_iReadDataSize;// How much data has been read this frame
+    int m_iReadDataSize;
 };
 
 #endif // OPENAL_WAVSAMPLE_H

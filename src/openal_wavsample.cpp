@@ -38,6 +38,7 @@ COpenALWavSample::COpenALWavSample()
     m_iFrequency = 0;
     m_iDataOffset = 0;
     wavFile = FILESYSTEM_INVALID_HANDLE;
+    m_pszFileName = "";
 }
 
 COpenALWavSample::~COpenALWavSample()
@@ -76,7 +77,7 @@ void COpenALWavSample::Open(const char* filename)
         }
     }
 
-    Q_strncpy(m_pszFileName, path, sizeof(m_pszFileName) );
+    m_pszFileName = filename;
 
     // Magic check
     if ( !filesystem->Read(magic, 4, wavFile) )

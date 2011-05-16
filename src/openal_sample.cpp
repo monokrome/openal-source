@@ -37,7 +37,8 @@ void IOpenALSample::Init()
     ALenum error = alGetError();
 	if (error != AL_NO_ERROR)
 	{
-		Warning("OpenAL: Error generating a saomple's buffers. Sample will not play.\n");
+		Warning("OpenAL: Error generating a sample's buffers. Sample will not play.\n");
+        ERROR_OUTPUT(error);
         ERROR_OUTPUT(error);
 		return;
 	}
@@ -287,7 +288,8 @@ void IOpenALSample::ClearBuffers()
 void IOpenALSample::BufferData(ALuint bufferID, ALenum format, const ALvoid* data, ALsizei size, ALsizei freq)
 {
 	alBufferData(bufferID, format, data, size, freq);
-	if (alGetError() != AL_NO_ERROR)
+    ALenum error = alGetError();
+	if (error != AL_NO_ERROR)
 	{
 		Warning("OpenAL: There was an error buffering audio data. Releasing deadly neurotoxin in 3... 2.. 1..\n");
         ERROR_OUTPUT(alGetError());
