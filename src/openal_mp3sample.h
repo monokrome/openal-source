@@ -3,7 +3,7 @@
 
 #include "Filesystem.h"
 #include "openal_sample.h"
-#include "openal/openal_loader.h"
+#include "openal_loader.h"
 
 #include <libmad/mad.h>
 
