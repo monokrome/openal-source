@@ -10,8 +10,12 @@
 
 // Defines differt strings that are used for OpenAL's console commands. %s = file extension
 #define OPENAL_DEMO_FILENAME "demo/demo.%s"
+#define OPENAL_DEFAULT_DEMO_FORMAT "ogg"
+#define OPENAL_NUMBER_OF_FORMATS 4
 
 IOpenALSample* demoSample = NULL;
+
+char *formats[OPENAL_NUMBER_OF_FORMATS] = { "ogg", "flac", "mp3", "wav" };
 
 /***
  * Stops all demos that rely on the demoSample pointer.
@@ -66,6 +70,42 @@ void OpenALWavDemo(void)
 {
 	OpenALStartDemo("wav");
 }
+
+/**
+ * Provides a more generic command that simply takes a format and plays a demo for that format.
+ */
+static int OpenALDemo_AutoComplete(char const *partial,
+								   char commands[COMMAND_COMPLETION_MAXITEMS][COMMAND_COMPLETION_ITEM_LENGTH])
+{
+	int number_results = 0;
+
+	for (int i=0; i < OPENAL_NUMBER_OF_FORMATS; ++i)
+	{
+		char *format_command = VarArgs("openal_demo %s", formats[i]);
+
+		if (strncmp(format_command, partial, strlen(partial)) == 0)
+		{
+			strcpy(commands[number_results], format_command);
+			++number_results;
+		}
+	}
+
+	return number_results;
+}
+
+void OpenALDemo(const CCommand &args)
+{
+	char *format;
+
+	if (args.ArgC() > 0)
+		format = (char *) args[1];
+	else
+		format = formats[0];
+
+	OpenALStartDemo(format);
+}
+
+ConCommand openal_demo("openal_demo", OpenALDemo, "Play a demo using OpenAL and the specified format.", 0, OpenALDemo_AutoComplete);
 
 ConCommand openal_ogg_demo("openal_ogg_demo", OpenALOggDemo, "Play a demo using OpenAL/ogg support.");
 ConCommand openal_flac_demo("openal_flac_demo", OpenALFlacDemo, "Play a demo using OpenAL/flac support.");
