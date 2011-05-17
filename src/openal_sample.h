@@ -5,7 +5,8 @@
 #include "KeyValues.h"
 
 #define NUM_BUFFERS 4
-#define OPENAL_BUFFER_SIZE 65536 // 65536 bytes = 64KB
+//#define OPENAL_BUFFER_SIZE 65536 // 65536 bytes = 64KB
+#define OPENAL_BUFFER_SIZE 16384
 
 class IOpenALSample
 {
@@ -41,6 +42,14 @@ public:
 
     void SetGain(float newGain) { m_fGain = newGain; }
 
+    /*
+        NOTE: All samples that do not call Persist() will be automatically deleted
+        when they're done playing to prevent memory leaks. Call Persist() on any
+        sample that you plan on storing to prevent this from happening.
+    */
+    void Persist() { m_bPersistent = true; }
+    bool IsPersistent() { return m_bPersistent; }
+
 	void SetLooping(bool shouldLoop);
 	void ClearBuffers();
 
@@ -70,6 +79,7 @@ protected:
 	bool m_bReady;     // Are we ready to play this file?
 	bool m_bRequiresSync; // If this is true, we syncronize with the engine.
 	bool m_bPositional; // Are we placed in a world position?
+    bool m_bPersistent; // Do not delete this sample automatically, used for pointers that are stored
 
 	CBaseEntity* m_pLinkedEntity; // Used for linking entities to this sample's source
 

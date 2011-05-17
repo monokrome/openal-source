@@ -34,6 +34,24 @@ bool COpenALGameSystem::Add(IOpenALSample *sample)
 	return true;
 }
 
+bool COpenALGameSystem::Remove(IOpenALSample* sample)
+{
+    AUTO_LOCK_FM(m_vSamples);
+
+    int index = m_vSamples.Find(sample);
+
+    if (m_vSamples.IsValidIndex(index))
+    {
+        m_vSamples.Remove(index);
+        m_grpGlobal->samples.FindAndRemove(sample);
+
+        delete sample;
+        sample = NULL;
+    }
+
+    return false;
+}
+
 bool COpenALGameSystem::Init()
 {
 	ALint ALhints[4];
@@ -251,13 +269,21 @@ void COpenALGameSystem::UpdateSamples(const float updateTime)
 	// Update our samples.
 	for (int i=0; i < m_vSamples.Count(); ++i)
 	{
-		if (m_vSamples[i]) // Verify that this pointer
-		{
-			if (m_vSamples[i]->IsReady())
-				m_vSamples[i]->Update(updateTime);
+        IOpenALSample *pSample = m_vSamples[i];
 
-			if (m_vSamples[i]->IsFinished())
+		if (pSample != NULL)
+		{
+			if (pSample->IsReady())
+				pSample->Update(updateTime);
+
+			if (pSample->IsFinished() && !pSample->IsPersistent())
+            {
+                // This automatically calls destroy on the sample
+                delete pSample; 
+                pSample = NULL;
+
 				m_vSamples.Remove(i);
+            }
 		}
 		else
 		{

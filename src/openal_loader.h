@@ -22,7 +22,7 @@ public:
 class COpenALLoader
 {
 public:
-	IOpenALSample* Load(char* fileType);
+	IOpenALSample* Load(const char* fileType);
 
 	void Register(IOpenALLoaderExt *extension, char *fileType);
 	void Deregister(IOpenALLoaderExt *extension, char *fileType);

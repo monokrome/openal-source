@@ -10,6 +10,7 @@ IOpenALSample::IOpenALSample()
 	m_bReady = false;
 	m_bRequiresSync = true;
 	m_bPositional = false;
+    m_bPersistent = false;
 
 	m_fGain = 1.0;
 	m_fFadeScalar = 1.0;
@@ -38,8 +39,7 @@ void IOpenALSample::Init()
 	if (error != AL_NO_ERROR)
 	{
 		Warning("OpenAL: Error generating a sample's buffers. Sample will not play.\n");
-        ERROR_OUTPUT(error);
-        ERROR_OUTPUT(error);
+        OPENAL_ERROR(error);
 		return;
 	}
 
@@ -49,7 +49,7 @@ void IOpenALSample::Init()
 	if (error != AL_NO_ERROR)
 	{
 		Warning("OpenAL: Error generating a sample's source. Sample will not play.\n");
-        ERROR_OUTPUT(error);
+        OPENAL_ERROR(error);
 		return;
 	}
 
@@ -75,14 +75,14 @@ void IOpenALSample::Destroy()
 	if ( error != AL_NO_ERROR)
 	{
 		Warning("OpenAL: Error deleting a sound source. Destroying anyway.\n");
-        ERROR_OUTPUT(error);
+        OPENAL_ERROR(error);
 	}
 
 	alDeleteBuffers(NUM_BUFFERS, buffers);
     if ( error != AL_NO_ERROR)
     {
 		Warning("OpenAL: Error deleting buffers. Destroying anyway.\n");
-        ERROR_OUTPUT(error);
+        OPENAL_ERROR(error);
 	}
 }
 
@@ -130,7 +130,7 @@ inline void IOpenALSample::UpdateBuffers(const float updateTime)
 		if (error != AL_NO_ERROR)
 		{
 			Warning("OpenAL: There was an error unqueuing a buffer. Issues may arise.\n");
-            ERROR_OUTPUT(error);
+            OPENAL_ERROR(error);
 		}
 
 		active = CheckStream(buffer);
@@ -143,7 +143,7 @@ inline void IOpenALSample::UpdateBuffers(const float updateTime)
             if (error != AL_NO_ERROR)
             {
 				Warning("OpenAL: There was an error queueing a buffer. Expect some turbulence.\n");
-                ERROR_OUTPUT(error);
+                OPENAL_ERROR(error);
 			}
 
 			if (state != AL_PLAYING && state != AL_PAUSED)
@@ -178,17 +178,23 @@ void IOpenALSample::Play()
         return;
     }
 
+    ALenum error;
+
     alSourceQueueBuffers(source, buffersToQueue, buffers);
-    if (alGetError() != AL_NO_ERROR)
+    error = alGetError();
+    if (error != AL_NO_ERROR)
     {
         Warning("OpenAL: There was an error queueing buffers. This will probably fix itself, but it's still not ideal.\n");
+        OPENAL_ERROR(error);
     }
 
     alSourcePlay(source);
-
-    if (alGetError() != AL_NO_ERROR)
+    
+    error = alGetError();
+    if (error != AL_NO_ERROR)
     {
         Warning("OpenAL: Playing an audio sample failed horribly.\n");
+        OPENAL_ERROR(error);
     }
 }
 
@@ -201,7 +207,7 @@ void IOpenALSample::Stop()
 	if (alGetError() != AL_NO_ERROR)
 	{
 		Warning("OpenAL: Error stopping a sound. This is less than good news.\n");
-        ERROR_OUTPUT(alGetError());
+        OPENAL_ERROR(alGetError());
 	}
 
 	ClearBuffers();
@@ -256,7 +262,7 @@ bool IOpenALSample::IsPlaying()
     ALenum error = alGetError();
     if (error != AL_NO_ERROR)
     {
-        ERROR_OUTPUT(error); // Spy's sappin' mah error buffer!
+        OPENAL_ERROR(error); // Spy's sappin' mah error buffer!
     }
 
 	return (state == AL_PLAYING);
@@ -278,7 +284,7 @@ void IOpenALSample::ClearBuffers()
 	if (alGetError() != AL_NO_ERROR)
     {
 		Warning("OpenAL: An error occured while attempting to clear a source's buffers.\n");
-        ERROR_OUTPUT(alGetError());
+        OPENAL_ERROR(alGetError());
     }
 }
 
@@ -292,7 +298,7 @@ void IOpenALSample::BufferData(ALuint bufferID, ALenum format, const ALvoid* dat
 	if (error != AL_NO_ERROR)
 	{
 		Warning("OpenAL: There was an error buffering audio data. Releasing deadly neurotoxin in 3... 2.. 1..\n");
-        ERROR_OUTPUT(alGetError());
+        OPENAL_ERROR(alGetError());
 	}
 }
 
@@ -322,7 +328,7 @@ void IOpenALSample::SetPositional(bool positional=false)
         if (error != AL_NO_ERROR)
         {
 			Warning("OpenAL: Couldn't update rolloff factor to enable positional audio.\n");
-            ERROR_OUTPUT(error);
+            OPENAL_ERROR(error);
 		}
 	}
 	else
@@ -334,7 +340,7 @@ void IOpenALSample::SetPositional(bool positional=false)
 		if (error != AL_NO_ERROR)
 		{
 			Warning("OpenAL: Couldn't update rolloff factor to disable positional audio.\n");
-            ERROR_OUTPUT(error);
+            OPENAL_ERROR(error);
 		}
 	}
 

@@ -32,8 +32,6 @@
 #include "openal/openal_sample_pool.h"
 #include "soundchars.h"
 
-COpenALOggSample sample;
-
 #endif
 
 // memdbgon must be the last include file in a .cpp file!!!
@@ -981,6 +979,14 @@ public:
     void EmitSoundByHandle( IRecipientFilter& filter, int entindex, const EmitSound_t & ep, HSOUNDSCRIPTHANDLE& handle )
     {
 #ifdef CLIENT_DLL
+        IOpenALSample *pSample = g_OpenALLoader.Load( PSkipSoundChars(ep.m_pSoundName) );
+
+        if (pSample != NULL && pSample->IsReady())
+        {
+            pSample->Play();
+            return;
+        }
+
         // Pull data from parameters
         CSoundParameters params;
 
@@ -1001,9 +1007,14 @@ public:
         if ( !params.soundname[0] )
             return;
 
-        if ( !Q_stristr(params.soundname, ".mp3" ) )
+        pSample = g_OpenALLoader.Load( PSkipSoundChars(params.soundname) );
+
+        if ( pSample != NULL )
         {
-            g_OpenALSamplePool.CreateNewSample( PSkipSoundChars( params.soundname ), ep );
+            if (pSample->IsReady())
+            {
+                pSample->Play();
+            }
         }
         else
         {
@@ -1023,10 +1034,38 @@ public:
     void EmitSound( IRecipientFilter& filter, int entindex, const EmitSound_t & ep )
     {
 #ifdef CLIENT_DLL
+        IOpenALSample *pSample = g_OpenALLoader.Load( PSkipSoundChars(ep.m_pSoundName) );
 
-        if ( Q_stristr(ep.m_pSoundName, ".ogg") || Q_stristr(ep.m_pSoundName, ".wav" ) )
+        if (pSample != NULL && pSample->IsReady())
         {
-            g_OpenALSamplePool.CreateNewSample( PSkipSoundChars( ep.m_pSoundName ), ep );
+            pSample->Play();
+            return;
+        }
+
+        // Pull data from parameters
+        CSoundParameters params;
+
+        // Try to deduce the actor's gender
+        gender_t gender = GENDER_NONE;
+        CBaseEntity *ent = CBaseEntity::Instance( entindex );
+        if ( ent )
+        {
+            char const *actorModel = STRING( ent->GetModelName() );
+            gender = soundemitterbase->GetActorGender( actorModel );
+        }
+
+        if ( !soundemitterbase->GetParametersForSound( ep.m_pSoundName,  params, gender ) )
+        {
+            return;
+        }
+
+        if ( !params.soundname[0] )
+            return;
+
+        pSample = g_OpenALLoader.Load( PSkipSoundChars(params.soundname) );
+        if ( pSample != NULL)
+        {
+            pSample->Play();
         }
         else
         {

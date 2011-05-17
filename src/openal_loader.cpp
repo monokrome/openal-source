@@ -4,7 +4,7 @@
 
 COpenALLoader g_OpenALLoader;
 
-IOpenALSample* COpenALLoader::Load(char* path)
+IOpenALSample* COpenALLoader::Load(const char* path)
 {
     if (path == NULL)
     {
