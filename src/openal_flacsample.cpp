@@ -92,12 +92,14 @@ bool COpenALFLACSample::CheckStream(ALuint buffer)
 
         if (state == FLAC__STREAM_DECODER_END_OF_STREAM)
         {
-            /*
             if (m_bLooping)
             {
-                FLAC::Decoder::Stream::seek_absolute(0);
+                //FLAC::Decoder::Stream::flush();
+                //FLAC::Decoder::Stream::seek_absolute(0);
+
+                FLAC::Decoder::Stream::reset();
             }
-            else*/
+            else
             {
                 m_bHitEOF = true;
                 break;
@@ -284,10 +286,13 @@ void COpenALFLACSample::metadata_callback(const FLAC__StreamMetadata *metadata)
     }
 
     // Debug header
-    Msg("FLAC: %i bits %s audio at %i\n",
-        bits,
-        channels == 2 ? "stereo" : "mono",
-        sampleRate);
+    if (!m_bLooping)
+    {
+        Msg("FLAC: %i bits %s audio at %i\n",
+            bits,
+            channels == 2 ? "stereo" : "mono",
+            sampleRate);
+    }
 }
 
 void COpenALFLACSample::error_callback(::FLAC__StreamDecoderErrorStatus status)
