@@ -113,12 +113,14 @@ bool COpenALFLACSample::CheckStream(ALuint buffer)
         Warning("FLAC: Decoding returned with critical state: %s", FLAC__StreamDecoderStateString[state] );
     }
 
-    BufferData(buffer, format, data, size, sampleRate);
-
     if (hitEOF)
     {
         m_bFinished = true;
         return false;
+    }
+    else
+    {
+        BufferData(buffer, format, data, size, sampleRate);
     }
 
 	return true;

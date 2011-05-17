@@ -8,6 +8,8 @@
 // See https://ccrma.stanford.edu/courses/422/projects/WaveFormat/
 // for an excellent explanation of the wav format
 //
+// http://www.sonicspot.com/guide/wavefiles.html#cue
+//
 //=============================================================================//
 
 #include "cbase.h"
