@@ -72,8 +72,22 @@ void OpenALWavDemo(void)
 }
 
 /**
- * Provides a more generic command that simply takes a format and plays a demo for that format.
+ * Provides a more generic command that simply takes a format and plays a demo for that format. If
+ * no format is specified, reverts to the first format in the `formats` array.
  */
+void OpenALDemo(const CCommand &args)
+{
+	char *format;
+
+	if (args.ArgC() > 1)
+		format = (char *) args[1];
+	else
+		format = formats[0];
+
+	OpenALStartDemo(format);
+}
+
+// Provides autocompletion for the openal_demo command in the console.
 static int OpenALDemo_AutoComplete(char const *partial,
 								   char commands[COMMAND_COMPLETION_MAXITEMS][COMMAND_COMPLETION_ITEM_LENGTH])
 {
@@ -93,17 +107,6 @@ static int OpenALDemo_AutoComplete(char const *partial,
 	return number_results;
 }
 
-void OpenALDemo(const CCommand &args)
-{
-	char *format;
-
-	if (args.ArgC() > 0)
-		format = (char *) args[1];
-	else
-		format = formats[0];
-
-	OpenALStartDemo(format);
-}
 
 ConCommand openal_demo("openal_demo", OpenALDemo, "Play a demo using OpenAL and the specified format.", 0, OpenALDemo_AutoComplete);
 
