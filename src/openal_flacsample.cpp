@@ -12,7 +12,7 @@ COpenALFLACSample::COpenALFLACSample()
     size = 0;
     sampleRate = 0;
     sizeOfLast = 0;
-    hitEOF = false;
+    m_bHitEOF = false;
 }
 
 COpenALFLACSample::~COpenALFLACSample()
@@ -28,7 +28,7 @@ void COpenALFLACSample::Open(const char* filename)
     size = 0;
     sampleRate = 0;
     sizeOfLast = 0;
-    hitEOF = false;
+    m_bHitEOF = false;
 
     if (!FLAC::Decoder::Stream::is_valid())
     {
@@ -58,7 +58,7 @@ void COpenALFLACSample::Open(const char* filename)
     }
 
     m_pWriteData = NULL;
-    hitEOF = false;
+    m_bHitEOF = false;
     
     m_bFinished = false; // Sample has just started, assume not finished
 
@@ -68,7 +68,7 @@ void COpenALFLACSample::Open(const char* filename)
 void COpenALFLACSample::Close()
 {
 	m_bReady = false;
-    hitEOF = false;
+    m_bHitEOF = false;
 	ClearBuffers();
     filesystem->Close(flacFile);
 
@@ -88,12 +88,34 @@ bool COpenALFLACSample::CheckStream(ALuint buffer)
 
     while ( size < OPENAL_BUFFER_SIZE )
     {
+        FLAC__StreamDecoderState state = FLAC::Decoder::Stream::get_state();
+
+        if (state == FLAC__STREAM_DECODER_END_OF_STREAM)
+        {
+            /*
+            if (m_bLooping)
+            {
+                FLAC::Decoder::Stream::seek_absolute(0);
+            }
+            else*/
+            {
+                m_bHitEOF = true;
+                break;
+            }
+        }
+        else if ( state >= FLAC__STREAM_DECODER_OGG_ERROR )
+        {
+            // Critical error occured
+            Warning("FLAC: Decoding returned with critical state: %s", FLAC__StreamDecoderStateString[state] );
+            break;
+        }
+
         if ( !FLAC::Decoder::Stream::process_single() )
         {
             Warning("FLAC: Processing of a single frame failed!\n");
+            break;
         }
         
-
         // if we can't fit an additional frame into the buffer, quit
         if (sizeOfLast > m_pWriteDataEnd-m_pWriteData )
         {
@@ -101,19 +123,7 @@ bool COpenALFLACSample::CheckStream(ALuint buffer)
         }
     }
 
-    FLAC__StreamDecoderState state = FLAC::Decoder::Stream::get_state();
-
-    if (state == FLAC__STREAM_DECODER_END_OF_STREAM)
-    {
-        hitEOF = true;
-    }
-    else if ( state >= FLAC__STREAM_DECODER_OGG_ERROR )
-    {
-        // Critical error occured
-        Warning("FLAC: Decoding returned with critical state: %s", FLAC__StreamDecoderStateString[state] );
-    }
-
-    if (hitEOF)
+    if (m_bHitEOF)
     {
         m_bFinished = true;
         return false;
@@ -134,12 +144,12 @@ FLAC__StreamDecoderReadStatus COpenALFLACSample::read_callback(FLAC__byte buffer
 
         if (size < 0)
         {
-            hitEOF = true;
+            m_bHitEOF = true;
             return FLAC__STREAM_DECODER_READ_STATUS_ABORT;
         }
         else if (size == 0)
         {
-            hitEOF = true;
+            m_bHitEOF = true;
             return FLAC__STREAM_DECODER_READ_STATUS_END_OF_STREAM;
         }
         else
@@ -149,7 +159,7 @@ FLAC__StreamDecoderReadStatus COpenALFLACSample::read_callback(FLAC__byte buffer
     }
     else
     {
-        hitEOF = true;
+        m_bHitEOF = true;
         return FLAC__STREAM_DECODER_READ_STATUS_ABORT;
     }
 }
@@ -176,7 +186,13 @@ FLAC__StreamDecoderLengthStatus COpenALFLACSample::length_callback(FLAC__uint64 
 
 bool COpenALFLACSample::eof_callback()
 {
-    hitEOF = filesystem->EndOfFile( flacFile );
+    bool hitEOF = filesystem->EndOfFile( flacFile );
+
+    if (hitEOF)
+    {
+        m_bHitEOF = true;
+    }
+
     return hitEOF;
 }
 
@@ -212,7 +228,7 @@ FLAC__StreamDecoderWriteStatus COpenALFLACSample::write_callback(const ::FLAC__F
             }
             else
             {
-                hitEOF = true;
+                m_bHitEOF = true;
                 return FLAC__STREAM_DECODER_WRITE_STATUS_ABORT;
             }
         }
@@ -236,7 +252,7 @@ FLAC__StreamDecoderWriteStatus COpenALFLACSample::write_callback(const ::FLAC__F
             }
             else
             {
-                hitEOF = true;
+                m_bHitEOF = true;
                 return FLAC__STREAM_DECODER_WRITE_STATUS_ABORT;
             }
         }

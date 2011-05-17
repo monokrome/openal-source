@@ -4,12 +4,42 @@
 
 COpenALLoader g_OpenALLoader;
 
-IOpenALSample* COpenALLoader::Load(char* fileType)
+IOpenALSample* COpenALLoader::Load(char* path)
 {
-	unsigned short index = m_loaderExtensions.Find(fileType);
+    if (path == NULL)
+    {
+        return NULL;
+    }
+
+    /*
+    In most cases a file path is provided as argument, 
+    but we support passing just the extension as well
+    */
+    bool isFile = true; 
+
+    char ext[8];
+    V_ExtractFileExtension(path, ext, sizeof(ext));
+
+    if (!V_strlen(ext))
+    {
+        // Assume that the argument was the extension
+        V_strcpy(ext, path);
+        isFile = false;
+    }
+
+    unsigned short index = m_loaderExtensions.Find(ext);
 
     if ( m_loaderExtensions.IsValidIndex(index) )
-        return m_loaderExtensions[index]->Get();
+    {
+        IOpenALSample *pSample = m_loaderExtensions[index]->Get();
+
+        if (pSample != NULL && isFile)
+        {
+            pSample->Open(path);
+        }
+
+        return pSample;
+    }
 
 	return NULL;
 }

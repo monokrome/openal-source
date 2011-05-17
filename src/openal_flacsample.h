@@ -43,8 +43,7 @@ private:
     int size;
     int sampleRate;
     int sizeOfLast;
-    bool hitEOF;
-
+    bool m_bHitEOF;
 };
 
 class COpenALFLACLoaderExt : public IOpenALLoaderExt
