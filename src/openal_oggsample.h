@@ -34,7 +34,7 @@ class COpenALOggLoaderExt : public IOpenALLoaderExt
 {
 public:
 	virtual bool Init();
-	~COpenALOggLoaderExt();
+	virtual void Shutdown();
 
 	virtual IOpenALSample* Get();
 };

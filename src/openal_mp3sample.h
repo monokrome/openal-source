@@ -61,7 +61,7 @@ class COpenALMp3LoaderExt : public IOpenALLoaderExt
 {
 public:
 	virtual bool Init();
-	~COpenALMp3LoaderExt();
+	virtual void Shutdown();
 
 	virtual IOpenALSample* Get();
 };

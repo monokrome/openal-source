@@ -285,11 +285,11 @@ COpenALFLACLoaderExt flacLoader;
 bool COpenALFLACLoaderExt::Init()
 {
 	g_OpenALLoader.Register(this, "flac");
-	
+
 	return true;
 }
 
-COpenALFLACLoaderExt::~COpenALFLACLoaderExt()
+void COpenALFLACLoaderExt::Shutdown()
 {
 	g_OpenALLoader.Deregister(this, "flac");
 }

@@ -319,7 +319,7 @@ public:
         return true;
     }
 
-    ~COpenALWavLoaderExt()
+    void Shutdown()
     {
         g_OpenALLoader.Deregister(this, "wav");
     }

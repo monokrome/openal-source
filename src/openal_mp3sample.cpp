@@ -638,7 +638,7 @@ bool COpenALMp3LoaderExt::Init()
     return true;
 }
 
-COpenALMp3LoaderExt::~COpenALMp3LoaderExt()
+void COpenALMp3LoaderExt::Shutdown()
 {
     g_OpenALLoader.Deregister(this, "mp3");
 }

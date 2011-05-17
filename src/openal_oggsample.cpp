@@ -216,7 +216,7 @@ bool COpenALOggLoaderExt::Init()
 	return true;
 }
 
-COpenALOggLoaderExt::~COpenALOggLoaderExt()
+void COpenALOggLoaderExt::Shutdown()
 {
 	g_OpenALLoader.Deregister(this, "ogg");
 }

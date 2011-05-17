@@ -51,7 +51,7 @@ class COpenALFLACLoaderExt : public IOpenALLoaderExt
 {
 public:
     virtual bool Init();
-    ~COpenALFLACLoaderExt();
+	virtual void Shutdown();
 
     virtual IOpenALSample* Get();
 };
