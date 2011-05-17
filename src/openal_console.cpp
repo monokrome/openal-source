@@ -32,15 +32,12 @@ void OpenALStartDemo(char *fileExtension)
 {
 	OpenALStopDemo();
 
-    if (demoSample == NULL)
-    {
-        demoSample = g_OpenALLoader.Load(fileExtension);
+	demoSample = g_OpenALLoader.Load(fileExtension);
 
-        if (demoSample == NULL)
-        {
-            return;
-        }
-    }
+	if (demoSample == NULL)
+	{
+		return;
+	}
 
 	demoSample->Open(VarArgs(OPENAL_DEMO_FILENAME, fileExtension));
     demoSample->Play();
