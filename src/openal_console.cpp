@@ -22,6 +22,8 @@ void OpenALStopDemo()
     {
 		if (demoSample->IsPlaying())
 			demoSample->Stop();
+
+		delete demoSample;
     }
 }
 
@@ -40,7 +42,8 @@ void OpenALStartDemo(char *fileExtension)
 	}
 
 	demoSample->Open(VarArgs(OPENAL_DEMO_FILENAME, fileExtension));
-    demoSample->Play();
+	demoSample->SetLooping(true);
+	demoSample->Play();
 }
 
 void OpenALOggDemo(void)
@@ -69,24 +72,3 @@ ConCommand openal_mp3_demo("openal_mp3_demo", OpenALMP3Demo, "Play a demo using 
 ConCommand openal_wav_demo("openal_wav_demo", OpenALWavDemo, "Play a demo using OpenAL/wav support.");
 
 ConCommand openal_stop_demo("openal_stop_demo", OpenALStopDemo, "Stop the current OpenAL playback demo.");
-
-CON_COMMAND( openal_play, "Play an arbitrary file using the OpenAL system" )
-{
-    if ( args.ArgC() != 2 )
-        return;
-
-    if (demoSample != NULL && demoSample->IsPlaying())
-    {
-        demoSample->Stop();
-    }
-
-    char path[MAX_PATH];
-    V_strcpy(path, args[1]);
-
-    demoSample = g_OpenALLoader.Load(path);
-
-    if (demoSample != NULL)
-    {
-        demoSample->Play();
-    }
-}
