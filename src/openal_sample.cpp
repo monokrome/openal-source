@@ -28,7 +28,7 @@ IOpenALSample::IOpenALSample()
 
 IOpenALSample::~IOpenALSample()
 {
-	//Destroy(); // It never hurts to verify!
+	Destroy(); // It never hurts to verify!
 }
 
 void IOpenALSample::Init()
