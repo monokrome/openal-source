@@ -24,6 +24,7 @@ void OpenALStopDemo()
 			demoSample->Stop();
 
 		delete demoSample;
+		demoSample = NULL;
     }
 }
 
