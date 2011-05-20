@@ -10,6 +10,8 @@
 //
 // http://www.sonicspot.com/guide/wavefiles.html#cue
 //
+//
+//
 //=============================================================================//
 
 #include "cbase.h"
@@ -50,15 +52,15 @@ COpenALWavSample::~COpenALWavSample()
 
 void COpenALWavSample::Open(const char* filename)
 {
-    // Todo:
-    // Make a more sturdy version of this?
-
     char path[MAX_PATH_LENGTH];
     char magic[5];
     magic[4] = '\0';
 
     unsigned char buffer32[4];
     unsigned char buffer16[2];
+
+    unsigned short channels;
+    unsigned short bps;
 
     m_iDataOffset = 44;
 
@@ -81,13 +83,13 @@ void COpenALWavSample::Open(const char* filename)
 
     m_pszFileName = filename;
 
-    // Magic check
     if ( !filesystem->Read(magic, 4, wavFile) )
     {
         Warning("Unable to read wav file: %s \n", filename);
         return;
     }
 
+    // Magic check
     if (!FStrEq(magic, "RIFF"))
     {
         Warning("Invalid file format in wave file %s (no RIFF magic)\n", filename);
@@ -110,126 +112,169 @@ void COpenALWavSample::Open(const char* filename)
         return;
     }
 
-    // fmt check
-    if ( !filesystem->Read(magic, 4, wavFile) )
+    int attempts = 1;
+
+    while (attempts)
     {
-        Warning("Unable to read wav file: %s\n", filename);
-        return;
-    }
+        // Abort if we've read too much of 
+        // the file without finding the data chunk
+        if (attempts >= 10)
+        {
+            Warning("Too many chunks in wave file\n");
+            return;
+        }
 
-    if (!FStrEq(magic, "fmt "))
-    {
-        Warning("Invalid file format in wave file %s (no fmt subchunk)\n", filename);
-        return;
-    }
-
-    // Check size of (1)
-    if ( !filesystem->Read(buffer32, 4, wavFile) )
-    {
-        Warning("Unable to read wav file: %s\n", filename);
-        return;
-    }
-    
-    unsigned long subChunk1Size = readByte32(buffer32);
-    if (subChunk1Size < 16)
-    {
-        Warning("Invalid file format in wave file %s (fmt chunk too small, truncated?)\n", filename);
-        return;
-    }
-
-    // Check PCM format
-    if ( !filesystem->Read(buffer16, 2, wavFile) )
-    {
-        Warning("Unable to read wav file: %s\n", filename);
-        return;
-    }
-
-    unsigned short audioFormat = readByte16(buffer16);
-
-    if (audioFormat != 1)
-    {
-        Warning("Invalid file format in wave file %s (audio format is not PCM)\n", filename);
-        return;
-    }
-
-    // read channels
-    if ( !filesystem->Read( buffer16, 2, wavFile) ) 
-    {
-        Warning("Unable to read wav file: %s\n", filename);
-        return;
-    }
-
-    unsigned short channels = readByte16(buffer16);
-
-    // read frequency
-    if ( !filesystem->Read(buffer32, 4, wavFile) )
-    {
-        Warning("Unable to read wav file: %s\n", filename);
-        return;
-    }
-
-    unsigned long frequency = readByte32(buffer32);
-    m_iFrequency = frequency;
-
-    filesystem->Seek( wavFile, 6, FILESYSTEM_SEEK_CURRENT);
-
-    // read bps
-    if ( !filesystem->Read( buffer16, 2, wavFile) ) 
-    {
-        Warning("Unable to read wav file: %s\n", filename);
-        return;
-    }
-
-    unsigned short bps = readByte16(buffer16);
-
-    if (channels == 1)
-    {
-        format = (bps == 8) ? AL_FORMAT_MONO8 : AL_FORMAT_MONO16;
-    }
-    else
-    {
-        format = (bps == 8) ? AL_FORMAT_STEREO8 : AL_FORMAT_STEREO16;
-    }
-    
-    // read data sub-chunk
-    if ( !filesystem->Read( magic, 4, wavFile) ) 
-    {
-        Warning("Unable to read wav file: %s\n", filename);
-        return;
-    }
-
-    if ( FStrEq(magic, "fact" ) )
-    {
-        // Skip fact chunk if present
-        filesystem->Seek(wavFile, 8, FILESYSTEM_SEEK_CURRENT);
-
-        if ( !filesystem->Read( magic, 4, wavFile) ) 
+        if ( !filesystem->Read(magic, 4, wavFile) )
         {
             Warning("Unable to read wav file: %s\n", filename);
             return;
         }
 
-        m_iDataOffset += 12; // 8+4
+        // fmt check
+        if ( !V_stricmp(magic, "fmt ") )
+        {
+            // Check size of (1)
+            if ( !filesystem->Read(buffer32, 4, wavFile) )
+            {
+                Warning("Unable to read wav file: %s\n", filename);
+                return;
+            }
+
+            unsigned long subChunk1Size = readByte32(buffer32);
+            if (subChunk1Size < 16)
+            {
+                Warning("Invalid file format in wave file %s (fmt chunk too small, truncated?)\n", filename);
+                return;
+            }
+            int subChunk1Remaining = subChunk1Size-4; // How much that's left to read
+
+            // Check PCM format
+            if ( !filesystem->Read(buffer16, 2, wavFile) )
+            {
+                Warning("Unable to read wav file: %s\n", filename);
+                return;
+            }
+            subChunk1Remaining -= 2;
+
+            unsigned short audioFormat = readByte16(buffer16);
+
+            if (audioFormat != 1)
+            {
+                Warning("Invalid file format in wave file %s (audio format is not PCM)\n", filename);
+                return;
+            }
+
+            // read channels
+            if ( !filesystem->Read( buffer16, 2, wavFile) ) 
+            {
+                Warning("Unable to read wav file: %s\n", filename);
+                return;
+            }
+            subChunk1Remaining -= 2;
+
+            channels = readByte16(buffer16);
+
+            // read frequency
+            if ( !filesystem->Read(buffer32, 4, wavFile) )
+            {
+                Warning("Unable to read wav file: %s\n", filename);
+                return;
+            }
+            subChunk1Remaining -= 4;
+
+            unsigned long frequency = readByte32(buffer32);
+            m_iFrequency = frequency;
+
+            // Skip average bytes per second
+            filesystem->Seek( wavFile, 4, FILESYSTEM_SEEK_CURRENT);
+
+            // read block align
+            if ( !filesystem->Read( buffer16, 2, wavFile) ) 
+            {
+                Warning("Unable to read wav file: %s\n", filename);
+                return;
+            }
+            subChunk1Remaining -= 2;
+
+            unsigned short blockalign = readByte16(buffer16);
+            m_iBlockAlign = blockalign;
+
+            // read bps
+            if ( !filesystem->Read( buffer16, 2, wavFile) ) 
+            {
+                Warning("Unable to read wav file: %s\n", filename);
+                return;
+            }
+            subChunk1Remaining -= 2;
+
+            bps = readByte16(buffer16);
+
+            if ( subChunk1Remaining >= 0)
+            {
+                filesystem->Seek( wavFile, subChunk1Remaining, FILESYSTEM_SEEK_CURRENT);
+            }
+            else
+            {
+                Assert(0);
+            }
+
+        }
+
+        if ( !V_stricmp(magic, "fact" ) )
+        {
+            // Skip fact chunk if present
+            //filesystem->Seek(wavFile, 8, FILESYSTEM_SEEK_CURRENT);
+            if ( !filesystem->Read(buffer32, 4, wavFile) ) 
+            {
+                Warning("Unable to read wav file: %s\n", filename);
+                return;
+            }
+
+            int factChunkSize = readByte32(buffer32);
+            filesystem->Seek( wavFile, factChunkSize-4, FILESYSTEM_SEEK_CURRENT);
+        }
+
+        if ( !V_stricmp(magic, "data") )
+        {
+            // We've found the data sub chunk
+
+            // Read the size
+            if ( !filesystem->Read( buffer32, 4, wavFile) ) 
+            {
+                Warning("Unable to read wav file: %s\n", filename);
+                return;
+            }
+
+            unsigned long subChunk2Size = readByte32(buffer32);
+            m_iDataSize = subChunk2Size;
+            break; 
+        }
+
+        attempts++;
     }
 
-    if ( !FStrEq(magic, "data") )
+    if (channels == 1)
     {
-        Warning("Invalid file format in wave file %s (no data sub-chunk)\n", filename);
-        return;
+        format = (bps == 8) ? AL_FORMAT_MONO8 : AL_FORMAT_MONO16;
     }
-
-    if ( !filesystem->Read( buffer32, 4, wavFile) ) 
+    else if (channels == 2)
     {
-        Warning("Unable to read wav file: %s\n", filename);
-        return;
+        format = (bps == 8) ? AL_FORMAT_STEREO8 : AL_FORMAT_STEREO16;
     }
-
-    unsigned long subChunk2Size = readByte32(buffer32);
-    m_iDataSize = subChunk2Size;
+    else
+    {
+        Warning("Unable to determine number of channels in wave file: %s", filename);
+    }
 
     m_bFinished = false;
 
     Init();
+
+    if (channels == 1)
+    {
+        SetPositional(true);
+        SetPosition(0,0,0);
+    }
 }
 
 void COpenALWavSample::Close()
@@ -250,10 +295,13 @@ bool COpenALWavSample::CheckStream(ALuint buffer)
 
     char data[OPENAL_BUFFER_SIZE];
     int result, size=0;
+    
+    // Buffersize may not correspond to block alignment!
+    int bytesToRead = (OPENAL_BUFFER_SIZE/m_iBlockAlign) * m_iBlockAlign;
 
-    while ( size < OPENAL_BUFFER_SIZE )
+    while ( size < bytesToRead )
     {
-        result = filesystem->Read( data, OPENAL_BUFFER_SIZE, wavFile );
+        result = filesystem->Read( data, bytesToRead, wavFile );
 
         if (result > 0) // More data is waiting to be read
         {
@@ -280,7 +328,6 @@ bool COpenALWavSample::CheckStream(ALuint buffer)
         if (!m_bLooping)
         {
             m_bFinished = true;
-            Stop();
             return false;
         }
 
@@ -288,7 +335,7 @@ bool COpenALWavSample::CheckStream(ALuint buffer)
         filesystem->Seek( wavFile, m_iDataOffset, FILESYSTEM_SEEK_HEAD );
 
         // Buffer the new stuff
-        result = filesystem->Read( data, OPENAL_BUFFER_SIZE, wavFile );
+        result = filesystem->Read( data, bytesToRead, wavFile );
 
         if (result > 0) // More data is waiting to be read
         {

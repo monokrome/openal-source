@@ -240,7 +240,22 @@ bool IOpenALSample::IsPositional()
  ***/
 bool IOpenALSample::IsFinished()
 {
-	return m_bFinished;
+    if (m_bFinished)
+    {
+        float seconds_played;
+        alGetSourcef(source, AL_SEC_OFFSET, &seconds_played);
+
+        if (alGetError() == AL_NO_ERROR)
+        {
+            // HACKHACK: Samples that are done streaming the same frame as they 
+            // start playing, will be deleted instantly
+            return seconds_played > 0.1f;
+        }
+
+        return true;
+    }
+
+    return false;
 }
 
 /***

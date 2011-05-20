@@ -24,7 +24,7 @@ private:
     FileHandle_t wavFile;
 
     int m_iFrequency;   // Sample rate
-
+    int m_iBlockAlign;  // Sample size
     int m_iDataOffset;  // Where in the file does the PCM data start?
     int m_iDataSize;    // Total size of PCM data
     int m_iReadDataSize;

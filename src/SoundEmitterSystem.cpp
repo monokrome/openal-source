@@ -983,7 +983,16 @@ public:
 
         if (pSample != NULL && pSample->IsReady())
         {
+            pSample->LinkEntity( CBaseEntity::Instance(entindex) );
+
+            if (ep.m_pOrigin != NULL)
+            {
+                pSample->SetPosition(*ep.m_pOrigin);
+            }
+
+            pSample->SetGain(ep.m_flVolume);
             pSample->Play();
+
             return;
         }
 
@@ -1009,12 +1018,17 @@ public:
 
         pSample = g_OpenALLoader.Load( PSkipSoundChars(params.soundname) );
 
-        if ( pSample != NULL )
+        if ( pSample != NULL && pSample->IsReady() )
         {
-            if (pSample->IsReady())
+            pSample->LinkEntity( CBaseEntity::Instance(entindex) );
+
+            if (ep.m_pOrigin != NULL)
             {
-                pSample->Play();
+                pSample->SetPosition(*ep.m_pOrigin);
             }
+
+            pSample->SetGain(ep.m_flVolume);
+            pSample->Play();
         }
         else
         {
@@ -1038,6 +1052,14 @@ public:
 
         if (pSample != NULL && pSample->IsReady())
         {
+            pSample->LinkEntity( CBaseEntity::Instance(entindex) );
+
+            if (ep.m_pOrigin != NULL)
+            {
+                pSample->SetPosition(*ep.m_pOrigin);
+            }
+
+            pSample->SetGain(ep.m_flVolume);
             pSample->Play();
             return;
         }
@@ -1063,8 +1085,17 @@ public:
             return;
 
         pSample = g_OpenALLoader.Load( PSkipSoundChars(params.soundname) );
-        if ( pSample != NULL)
+        if ( pSample != NULL && pSample->IsReady() )
         {
+            pSample->LinkEntity( CBaseEntity::Instance(entindex) );
+
+            if (ep.m_pOrigin != NULL)
+            {
+                pSample->SetPosition(*ep.m_pOrigin);
+            }
+
+            pSample->SetGain(ep.m_flVolume);
+
             pSample->Play();
         }
         else
