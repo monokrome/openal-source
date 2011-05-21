@@ -1,0 +1,7 @@
+# Don't commit any audio data to the repository.
+sounds/*
+
+# Ignored hidden files that don't provide git configuration
+.*
+!.gitignore
+!.gitmodules
