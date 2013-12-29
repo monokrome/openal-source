@@ -24,7 +24,7 @@ Coming Soon:
   - Occlusion culling (if Source allows)
   - Deafening effects
 - Entities allowing mappers to modify the state of the system
-- Optional fourier analysis system for beat detection and more
+- Fourier analysis system for beat detection and more
 
 Notes:
 ======
