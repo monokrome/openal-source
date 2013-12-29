@@ -9,7 +9,7 @@ Features:
 ---------
 
 - Audio moves at the speed of sound and respects the doppler effect
-- OggVorbis & WAV Playback
+- OggVorbis, MP3, FLAC and WAV Playback
 - Links audio sources to entities so that they are consistently in sync
 - Audio can be local to the player or positional
   - Uses for "local" audio include a media players, in-game radio, etc.
