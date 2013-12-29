@@ -12,7 +12,7 @@ Features:
 - OggVorbis, MP3, FLAC and WAV Playback
 - Links audio sources to entities so that they are consistently in sync
 - Audio can be local to the player or positional
-  - Uses for "local" audio include a media players, in-game radio, etc.
+  - Uses for "local" audio include media players, in-game radio, etc.
   - Positional audio can be used to add depth to an environment
 - Samples can be grouped together based on group names
 - Relinking standard Source entities to use OpenAL instead of Miles
