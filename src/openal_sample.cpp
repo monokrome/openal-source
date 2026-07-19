@@ -375,7 +375,7 @@ inline void IOpenALSample::UpdatePositional(const float lastUpdate)
 		// TODO: Provide methods for better control of this position
 		position[0] = m_pLinkedEntity->GetAbsOrigin().x;
 		position[1] = m_pLinkedEntity->GetAbsOrigin().y;
-		position[2] = m_pLinkedEntity->GetAbsOrigin().y;
+		position[2] = m_pLinkedEntity->GetAbsOrigin().z;
 
 		velocity[0] = m_pLinkedEntity->GetAbsVelocity().x;
 		velocity[1] = m_pLinkedEntity->GetAbsVelocity().y;
@@ -384,7 +384,7 @@ inline void IOpenALSample::UpdatePositional(const float lastUpdate)
         
         position[0] = m_pLinkedEntity->GetLocalOrigin().x;
         position[1] = m_pLinkedEntity->GetLocalOrigin().y;
-        position[2] = m_pLinkedEntity->GetLocalOrigin().y;
+        position[2] = m_pLinkedEntity->GetLocalOrigin().z;
 
         velocity[0] = m_pLinkedEntity->GetLocalVelocity().x;
         velocity[1] = m_pLinkedEntity->GetLocalVelocity().y;
@@ -457,8 +457,8 @@ void IOpenALSample::SetPosition(const float position[3])
 void IOpenALSample::SetVelocity(const Vector velocity)
 {
 	m_fVelocity[0] = velocity.x;
-	m_fVelocity[1] = velocity.x;
-	m_fVelocity[2] = velocity.x;
+	m_fVelocity[1] = velocity.y;
+	m_fVelocity[2] = velocity.z;
 
 	m_bRequiresSync = true;
 }

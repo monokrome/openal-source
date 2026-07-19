@@ -83,14 +83,14 @@ bool COpenALGameSystem::Init()
 
 	m_alContext = alcCreateContext(m_alDevice, NULL);
 
-	if (alGetError() != AL_NO_ERROR)
+	if (alcGetError(m_alDevice) != ALC_NO_ERROR)
 	{
 		Warning("OpenAL: Couldn't create an OpenAL context. Initialization failed.\n");
 		return false;
 	}
 
 	alcMakeContextCurrent(m_alContext);
-	if (alGetError() != AL_NO_ERROR)
+	if (alcGetError(m_alDevice) != ALC_NO_ERROR)
 	{
 		Warning("OpenAL: Couldn't make the OpenAL context current.\n");
 		return false;
@@ -331,7 +331,7 @@ openal_groupdata_t* COpenALGameSystem::FindGroup(char* name)
 
 	FOR_EACH_LL(m_AudioGroups, i)
 	{
-		if (m_AudioGroups[i]->name == name)
+		if (!Q_strcmp(m_AudioGroups[i]->name, name))
 		{
 			return m_AudioGroups[i];
 		}

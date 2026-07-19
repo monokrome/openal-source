@@ -1,5 +1,5 @@
-#ifndef __OPENAL_OGGSAMPLE_H
-#define __OPENAL_OGGSAMPLE_H
+#ifndef __OPENAL_FLACSAMPLE_H
+#define __OPENAL_FLACSAMPLE_H
 
 #define FLAC__NO_DLL
 
